@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { connectSocket, disconnectSocket } from '@/services/socket'
 
 const auth = useAuthStore()
+
+onMounted(() => {
+  connectSocket()
+})
+onUnmounted(() => {
+  disconnectSocket()
+})
 </script>
 
 <template>

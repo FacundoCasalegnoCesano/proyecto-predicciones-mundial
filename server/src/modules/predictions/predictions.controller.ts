@@ -6,6 +6,7 @@ export async function save(req: Request, res: Response, next: NextFunction): Pro
   try {
     const { matchId, homeScore, awayScore } = req.body
     const result = await upsertPrediction(req.user!.userId, matchId, homeScore, awayScore)
+    console.log('Emitting prediction_updated')
     getIO().emit('prediction_updated')
     res.status(201).json(result)
   } catch (err) {

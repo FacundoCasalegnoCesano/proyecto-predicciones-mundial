@@ -35,9 +35,8 @@
 - `GET /api/predictions/ranking` — ranking de usuarios por puntos
 
 ### Sistema de puntuación
-- 5 pts: resultado exacto
-- 3 pts: mismo ganador/perdedor + misma diferencia de goles
-- 2 pts: mismo ganador/empate
+- 6 pts: resultado exacto
+- 3 pts: mismo ganador/empate
 - 0 pts: incorrecto
 
 El campo `pointsEarned` en User se actualiza automáticamente al recalcular.

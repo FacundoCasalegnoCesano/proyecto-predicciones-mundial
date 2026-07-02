@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { connectSocket } from '@/services/socket'
 
 const auth = useAuthStore()
 
@@ -104,7 +105,19 @@ function formatTime(dateStr: string) {
   return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 }
 
-onMounted(() => { fetchMatches(); fetchPredictions() })
+const onPredictionUpdate = () => { fetchMatches(); fetchPredictions() }
+
+onMounted(() => {
+  fetchMatches()
+  fetchPredictions()
+  const socket = connectSocket()
+  socket.on('prediction_updated', onPredictionUpdate)
+})
+
+onUnmounted(() => {
+  const socket = connectSocket()
+  socket.off('prediction_updated', onPredictionUpdate)
+})
 </script>
 
 <template>

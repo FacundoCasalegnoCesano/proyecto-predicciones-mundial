@@ -14,29 +14,45 @@ interface RankingUser {
 const users = ref<RankingUser[]>([])
 const loading = ref(true)
 
+const lastUpdate = ref('')
+
 async function fetchRanking() {
   const res = await fetch('/api/predictions/ranking')
   users.value = await res.json()
+  lastUpdate.value = new Date().toLocaleTimeString()
   loading.value = false
+  console.log('Ranking refreshed at', lastUpdate.value)
 }
+
+const onRankingUpdate = () => { console.log('Event received: ranking_update'); fetchRanking() }
+const onPredictionUpdate = () => { console.log('Event received: prediction_updated'); fetchRanking() }
 
 onMounted(() => {
   fetchRanking()
   const socket = connectSocket()
-  socket.on('ranking_update', fetchRanking)
-  socket.on('prediction_updated', fetchRanking)
+  socket.on('ranking_update', onRankingUpdate)
+  socket.on('prediction_updated', onPredictionUpdate)
+  document.addEventListener('visibilitychange', onVisibility)
 })
 
 onUnmounted(() => {
   const socket = connectSocket()
-  socket.off('ranking_update', fetchRanking)
-  socket.off('prediction_updated', fetchRanking)
+  socket.off('ranking_update', onRankingUpdate)
+  socket.off('prediction_updated', onPredictionUpdate)
+  document.removeEventListener('visibilitychange', onVisibility)
 })
+
+function onVisibility() {
+  if (document.visibilityState === 'visible') { console.log('Tab visible, refreshing'); fetchRanking() }
+}
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gold mb-6">Tabla de Posiciones</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gold">Tabla de Posiciones</h1>
+      <span v-if="lastUpdate" class="text-xs text-gray-500">Última actualización: {{ lastUpdate }}</span>
+    </div>
 
     <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>
 
