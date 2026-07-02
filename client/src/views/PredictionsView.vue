@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { connectSocket } from '@/services/socket'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -129,12 +130,23 @@ function prediction(matchId: number) {
   return predictionsMap.value[matchId]
 }
 
+async function loadAll() {
+  await fetchMatches()
+  await fetchPredictions()
+}
+
 onMounted(async () => {
   if (!auth.token) { router.push('/login'); return }
   loading.value = true
-  await fetchMatches()
-  await fetchPredictions()
+  await loadAll()
   loading.value = false
+  const socket = connectSocket()
+  socket.on('prediction_updated', loadAll)
+})
+
+onUnmounted(() => {
+  const socket = connectSocket()
+  socket.off('prediction_updated', loadAll)
 })
 </script>
 

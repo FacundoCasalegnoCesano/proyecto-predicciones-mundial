@@ -4,13 +4,22 @@ let socket: Socket | null = null
 
 export function connectSocket(): Socket {
   if (!socket) {
-    socket = io({ autoConnect: true })
+    socket = io('http://localhost:3000', {
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    })
+    socket.on('connect', () => console.log('Socket connected'))
+    socket.on('disconnect', (reason) => console.log('Socket disconnected:', reason))
+    socket.on('connect_error', (err) => console.error('Socket error:', err.message))
   }
   return socket
 }
 
 export function disconnectSocket() {
   if (socket) {
+    socket.removeAllListeners()
     socket.disconnect()
     socket = null
   }
