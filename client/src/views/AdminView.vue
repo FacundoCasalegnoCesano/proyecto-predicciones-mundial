@@ -45,8 +45,11 @@ onMounted(fetchUsers)
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gold">Usuarios</h1>
-      <RouterLink to="/admin/matches" class="text-sm text-gray-400 hover:text-gold border border-pitch-lighter px-3 py-1.5 rounded-lg transition">Gestionar Partidos</RouterLink>
-      <input v-model="search" @input="fetchUsers" placeholder="Buscar..." class="bg-pitch border border-pitch-lighter rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 w-64 focus:outline-none focus:ring-2 focus:ring-gold" />
+      <div class="flex items-center gap-3">
+        <RouterLink to="/admin/predictions" class="text-sm text-gray-400 hover:text-gold border border-pitch-lighter px-3 py-1.5 rounded-lg transition">Pronósticos</RouterLink>
+        <RouterLink to="/admin/matches" class="text-sm text-gray-400 hover:text-gold border border-pitch-lighter px-3 py-1.5 rounded-lg transition">Partidos</RouterLink>
+        <input v-model="search" @input="fetchUsers" placeholder="Buscar..." class="bg-pitch border border-pitch-lighter rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 w-64 focus:outline-none focus:ring-2 focus:ring-gold" />
+      </div>
     </div>
 
     <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>

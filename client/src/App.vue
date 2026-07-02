@@ -13,6 +13,7 @@ const auth = useAuthStore()
         <div class="ml-auto flex items-center gap-4">
           <RouterLink v-if="auth.token" to="/dashboard" class="text-gray-400 hover:text-gold transition text-sm">Dashboard</RouterLink>
           <RouterLink v-if="auth.token" to="/matches" class="text-gray-400 hover:text-gold transition text-sm">Partidos</RouterLink>
+          <RouterLink to="/standings" class="text-gray-400 hover:text-gold transition text-sm">Posiciones</RouterLink>
           <RouterLink v-if="auth.token" to="/profile" class="text-gray-400 hover:text-gold transition text-sm">Perfil</RouterLink>
           <RouterLink v-if="auth.user?.role === 'ADMIN'" to="/admin" class="text-gray-400 hover:text-gold transition text-sm">Admin</RouterLink>
           <RouterLink v-if="!auth.token" to="/login" class="text-gray-400 hover:text-gold transition text-sm">Iniciar sesión</RouterLink>

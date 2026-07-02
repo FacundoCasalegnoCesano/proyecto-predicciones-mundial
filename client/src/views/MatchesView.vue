@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 
 interface Team {
   id: number
@@ -20,6 +23,8 @@ interface Match {
 }
 
 const matches = ref<Match[]>([])
+const predictions = ref<Record<number, { home: number; away: number }>>({})
+const saving = ref<Set<number>>(new Set())
 const loading = ref(true)
 const activePhase = ref('group')
 
@@ -51,16 +56,42 @@ const grouped = computed(() => {
   return groups
 })
 
-function flagUrl(code: string | null) {
-  if (!code) return ''
-  return `https://flagcdn.com/w40/${code.toLowerCase().replace('gb-', 'gb-')}.png`
-}
-
 async function fetchMatches() {
   loading.value = true
   const res = await fetch('/api/matches')
   matches.value = await res.json()
   loading.value = false
+}
+
+async function fetchPredictions() {
+  if (!auth.token) return
+  const res = await fetch('/api/predictions/mine', {
+    headers: { Authorization: `Bearer ${auth.token}` },
+  })
+  if (res.ok) {
+    const data = await res.json()
+    for (const p of data) {
+      predictions.value[p.matchId] = { home: p.predictedHomeScore, away: p.predictedAwayScore }
+    }
+  }
+}
+
+async function savePrediction(matchId: number) {
+  const p = predictions.value[matchId]
+  if (!p || p.home === undefined || p.away === undefined) return
+  saving.value.add(matchId)
+  await fetch('/api/predictions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+    body: JSON.stringify({ matchId, homeScore: p.home, awayScore: p.away }),
+  })
+  saving.value.delete(matchId)
+}
+
+function initPred(matchId: number) {
+  if (!predictions.value[matchId]) {
+    predictions.value[matchId] = { home: undefined as any, away: undefined as any }
+  }
 }
 
 function formatDate(dateStr: string) {
@@ -73,7 +104,7 @@ function formatTime(dateStr: string) {
   return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 }
 
-onMounted(fetchMatches)
+onMounted(() => { fetchMatches(); fetchPredictions() })
 </script>
 
 <template>
@@ -109,13 +140,45 @@ onMounted(fetchMatches)
             :key="m.id"
             class="bg-pitch-light border border-pitch-lighter rounded-xl px-5 py-4 flex items-center justify-between"
           >
-            <div class="flex items-center gap-3 w-[30%] justify-end">
+            <div class="flex items-center gap-3 w-[28%] justify-end">
               <span class="text-sm text-gray-200 font-medium truncate">{{ m.homeTeam?.name ?? 'Pendiente' }}</span>
-              <img v-if="m.homeTeam?.code" :src="flagUrl(m.homeTeam.code)" class="w-5 h-auto rounded-sm" :alt="m.homeTeam?.name ?? ''" />
+              <span v-if="m.homeTeam?.code" :class="'fi fi-' + m.homeTeam.code + ' text-lg leading-none'"></span>
             </div>
 
-            <div class="flex items-center gap-4 w-[30%] justify-center">
-              <template v-if="m.status === 'scheduled'">
+            <div class="flex items-center gap-2 w-[34%] justify-center">
+              <template v-if="m.status === 'scheduled' && m.homeTeam && m.awayTeam">
+                <template v-if="auth.token">
+                  <div class="flex items-center gap-1">
+                    <input
+                      :value="predictions[m.id]?.home ?? ''"
+                      @input="initPred(m.id); predictions[m.id].home = Number(($event.target as HTMLInputElement).value)"
+                      type="number" min="0" max="20"
+                      placeholder="?"
+                      class="w-10 text-center bg-pitch border border-pitch-lighter rounded-lg px-1 py-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold"
+                    />
+                    <span class="text-gray-600 text-xs">-</span>
+                    <input
+                      :value="predictions[m.id]?.away ?? ''"
+                      @input="initPred(m.id); predictions[m.id].away = Number(($event.target as HTMLInputElement).value)"
+                      type="number" min="0" max="20"
+                      placeholder="?"
+                      class="w-10 text-center bg-pitch border border-pitch-lighter rounded-lg px-1 py-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold"
+                    />
+                  </div>
+                  <button
+                    @click="savePrediction(m.id)"
+                    :disabled="saving.has(m.id) || predictions[m.id]?.home === undefined || predictions[m.id]?.away === undefined"
+                    class="ml-2 text-xs px-2 py-1 rounded-lg bg-gold text-pitch font-semibold hover:bg-gold-light transition disabled:opacity-40 cursor-pointer"
+                  >
+                    {{ saving.has(m.id) ? '...' : (predictions[m.id]?.home !== undefined ? 'Guardar' : 'Pronosticar') }}
+                  </button>
+                </template>
+                <div v-else class="text-center">
+                  <div class="text-xs text-gray-400">{{ formatDate(m.date) }}</div>
+                  <div class="text-xs text-gray-500">{{ formatTime(m.date) }}</div>
+                </div>
+              </template>
+              <template v-else-if="m.status === 'scheduled'">
                 <div class="text-center">
                   <div class="text-xs text-gray-400">{{ formatDate(m.date) }}</div>
                   <div class="text-xs text-gray-500">{{ formatTime(m.date) }}</div>
@@ -130,8 +193,8 @@ onMounted(fetchMatches)
               </template>
             </div>
 
-            <div class="flex items-center gap-3 w-[30%]">
-              <img v-if="m.awayTeam?.code" :src="flagUrl(m.awayTeam.code)" class="w-5 h-auto rounded-sm" :alt="m.awayTeam?.name ?? ''" />
+            <div class="flex items-center gap-3 w-[28%]">
+              <span v-if="m.awayTeam?.code" :class="'fi fi-' + m.awayTeam.code + ' text-lg leading-none'"></span>
               <span class="text-sm text-gray-200 font-medium truncate">{{ m.awayTeam?.name ?? 'Pendiente' }}</span>
             </div>
           </div>

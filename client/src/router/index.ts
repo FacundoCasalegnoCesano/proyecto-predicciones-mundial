@@ -9,8 +9,12 @@ const router = createRouter({
     { path: '/dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue') },
     { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
     { path: '/matches', name: 'matches', component: () => import('../views/MatchesView.vue') },
+    { path: '/predictions', name: 'predictions', component: () => import('../views/PredictionsView.vue') },
+    { path: '/standings', name: 'standings', component: () => import('../views/RankingView.vue') },
     { path: '/admin', name: 'admin', component: () => import('../views/AdminView.vue') },
     { path: '/admin/matches', name: 'admin-matches', component: () => import('../views/AdminMatchesView.vue') },
+    { path: '/admin/predictions', name: 'admin-predictions', component: () => import('../views/AdminPredictionsView.vue') },
+    { path: '/user/:userId/predictions', name: 'user-predictions', component: () => import('../views/UserPredictionsView.vue') },
   ],
 })
 

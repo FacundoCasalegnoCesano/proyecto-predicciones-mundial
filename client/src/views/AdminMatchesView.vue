@@ -45,11 +45,6 @@ const phases = [
   { key: 'final', label: 'Final' },
 ]
 
-function flagUrl(code: string | null) {
-  if (!code) return ''
-  return `https://flagcdn.com/w40/${code.toLowerCase().replace('gb-', 'gb-')}.png`
-}
-
 async function fetchMatches() {
   loading.value = true
   const res = await fetch(`/api/matches?phase=${activePhase.value}`, {
@@ -205,7 +200,7 @@ onMounted(() => { fetchTeams(); fetchMatches() })
             <div class="flex items-center gap-3 w-[28%] justify-end">
               <template v-if="m.homeTeam">
                 <span class="text-sm text-gray-200 font-medium truncate">{{ m.homeTeam.name }}</span>
-                <img v-if="m.homeTeam.code" :src="flagUrl(m.homeTeam.code)" class="w-5 h-auto rounded-sm" />
+                <span v-if="m.homeTeam.code" :class="'fi fi-' + m.homeTeam.code + ' text-lg leading-none'"></span>
               </template>
               <template v-else>
                 <select v-model="m.homeTeam" class="bg-pitch border border-pitch-lighter rounded-lg px-2 py-1 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold min-w-[150px]">
@@ -252,7 +247,7 @@ onMounted(() => { fetchTeams(); fetchMatches() })
 
             <div class="flex items-center gap-3 w-[28%]">
               <template v-if="m.awayTeam">
-                <img v-if="m.awayTeam.code" :src="flagUrl(m.awayTeam.code)" class="w-5 h-auto rounded-sm" />
+                <span v-if="m.awayTeam.code" :class="'fi fi-' + m.awayTeam.code + ' text-lg leading-none'"></span>
                 <span class="text-sm text-gray-200 font-medium truncate">{{ m.awayTeam.name }}</span>
               </template>
               <template v-else>

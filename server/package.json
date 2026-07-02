@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "start": "npx tsx src/server.ts",
+    "postinstall": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:studio": "npx prisma studio",
+    "seed": "npx tsx prisma/seed-2026.ts"
   },
   "type": "module",
   "keywords": [],
@@ -27,6 +28,7 @@
     "socket.io": "^4.8.3",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.22.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -37,7 +39,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.0",
     "@types/socket.io": "^3.0.1",
-    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
 }
