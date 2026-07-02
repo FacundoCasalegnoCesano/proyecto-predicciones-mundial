@@ -39,11 +39,10 @@ export async function getMyPredictions(userId: number) {
 }
 
 function calculatePoints(predictedHome: number, predictedAway: number, actualHome: number, actualAway: number): number {
-  if (predictedHome === actualHome && predictedAway === actualAway) return 5  // exact score
+  if (predictedHome === actualHome && predictedAway === actualAway) return 6  // exact score
   const predDiff = predictedHome - predictedAway
   const actualDiff = actualHome - actualAway
-  if (predDiff === actualDiff && predDiff !== 0) return 3  // correct winner/draw + diff
-  if (Math.sign(predDiff) === Math.sign(actualDiff) || (predDiff === 0 && actualDiff === 0)) return 2  // correct winner/draw
+  if (Math.sign(predDiff) === Math.sign(actualDiff) || (predDiff === 0 && actualDiff === 0)) return 3  // correct winner/draw
   return 0
 }
 
