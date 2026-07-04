@@ -1,40 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { toast } from 'vue-sonner'
+import { Search, RefreshCw, ChartLine, Swords } from '@lucide/vue'
+import { Button, Card, Badge } from '@/components/ui'
 
 const auth = useAuthStore()
-const router = useRouter()
-
-interface Prediction {
-  id: number
-  userId: number
-  matchId: number
-  predictedHomeScore: number
-  predictedAwayScore: number
-  points: number
-  user: { id: number; username: string; firstName: string | null; lastName: string | null }
-  match: {
-    id: number
-    phase: string
-    date: string
-    status: string
-    homeTeam: { id: number; name: string; code: string | null } | null
-    awayTeam: { id: number; name: string; code: string | null } | null
-    homeScore: number | null
-    awayScore: number | null
-  }
-}
-
-const predictions = ref<Prediction[]>([])
 const loading = ref(true)
+const predictions = ref<any[]>([])
 const search = ref('')
-const activePhase = ref('')
-const recalcLoading = ref(false)
+const phaseFilter = ref('all')
 
-const phases = [
-  { key: '', label: 'Todas' },
-  { key: 'group', label: 'Fase Grupos' },
+const PHASES = [
+  { key: 'all', label: 'Todas' },
+  { key: 'group', label: 'Grupos' },
   { key: 'round_of_32', label: '32avos' },
   { key: 'round_of_16', label: 'Octavos' },
   { key: 'quarter_final', label: 'Cuartos' },
@@ -43,135 +22,123 @@ const phases = [
   { key: 'final', label: 'Final' },
 ]
 
-function phaseLabel(key: string) {
-  const map: Record<string, string> = {
-    group: 'F. Grupos', round_of_32: '32avos', round_of_16: 'Octavos',
-    quarter_final: 'Cuartos', semi_final: 'Semis', third_place: '3er Puesto', final: 'Final',
-  }
-  return map[key] ?? key
-}
+const filtered = computed(() => {
+  return predictions.value.filter((p) => {
+    const matchPhase = (p.match?.phase || '').toLowerCase()
+    const userMatch = `${p.user?.firstName || ''} ${p.user?.lastName || ''} ${p.user?.username || ''}`.toLowerCase()
+    const q = search.value.toLowerCase()
+    const matchSearch = q === '' || userMatch.includes(q)
+    const matchPhaseFilter = phaseFilter.value === 'all' || matchPhase === phaseFilter.value
+    return matchSearch && matchPhaseFilter
+  })
+})
 
 async function fetchPredictions() {
   loading.value = true
   const res = await fetch('/api/predictions/admin/all', {
     headers: { Authorization: `Bearer ${auth.token}` },
   })
-  if (res.status === 403) { router.push('/dashboard'); return }
-  predictions.value = await res.json()
+  if (res.ok) predictions.value = await res.json()
   loading.value = false
 }
 
 async function recalculate() {
-  recalcLoading.value = true
-  await fetch('/api/predictions/calculate', {
+  const res = await fetch('/api/predictions/calculate', {
     method: 'POST',
     headers: { Authorization: `Bearer ${auth.token}` },
   })
-  recalcLoading.value = false
-  await fetchPredictions()
+  if (res.ok) { toast.success('Puntos recalculados'); fetchPredictions() }
+  else toast.error('Error al recalcular')
 }
 
-const filtered = () => {
-  let list = predictions.value
-  if (activePhase.value) {
-    list = list.filter((p) => p.match.phase === activePhase.value)
-  }
-  if (search.value.trim()) {
-    const q = search.value.toLowerCase()
-    list = list.filter(
-      (p) =>
-        p.user.username.toLowerCase().includes(q) ||
-        p.user.firstName?.toLowerCase().includes(q) ||
-        p.user.lastName?.toLowerCase().includes(q)
-    )
-  }
-  return list
+function phaseLabel(phase: string) {
+  return PHASES.find((p) => p.key === phase)?.label || phase
 }
 
 onMounted(fetchPredictions)
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gold">Admin - Pronósticos</h1>
-      <div class="flex items-center gap-3">
-        <button
-          @click="recalculate"
-          :disabled="recalcLoading"
-          class="px-4 py-2 rounded-lg bg-gold text-pitch font-semibold text-sm hover:bg-gold-light transition disabled:opacity-40 cursor-pointer"
-        >
-          {{ recalcLoading ? 'Recalculando...' : 'Recalcular puntos' }}
-        </button>
-        <RouterLink to="/admin" class="text-sm text-gray-400 hover:text-gold transition">← Usuarios</RouterLink>
+  <div class="animate-fade-in">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">Admin Pronósticos</h1>
+        <p class="text-sm text-muted-foreground mt-1">Revisá todos los pronósticos del sistema</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <RouterLink to="/admin"><Button variant="outline" size="sm"><Swords class="w-4 h-4" /> Usuarios</Button></RouterLink>
+        <Button variant="gold" size="sm" @click="recalculate"><RefreshCw class="w-4 h-4" /> Recalcular puntos</Button>
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-3 mb-6">
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="p in phases"
-          :key="p.key"
-          @click="activePhase = p.key"
-          :class="activePhase === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-pitch-light text-gray-400 hover:text-gold border border-pitch-lighter'"
-          class="px-3 py-1.5 rounded-lg text-xs transition cursor-pointer"
-        >
-          {{ p.label }}
-        </button>
+    <Card class="mb-6">
+      <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div class="relative flex-1 max-w-xs w-full">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input v-model="search" placeholder="Buscar usuario..." class="w-full h-9 rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button
+            v-for="p in PHASES" :key="p.key"
+            @click="phaseFilter = p.key"
+            :class="phaseFilter === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-card text-muted-foreground hover:text-foreground border border-border'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all duration-200 cursor-pointer"
+          >
+            {{ p.label }}
+          </button>
+        </div>
+        <span class="text-xs text-muted-foreground whitespace-nowrap">{{ filtered.length }} resultados</span>
       </div>
-      <input
-        v-model="search"
-        type="text"
-        placeholder="Buscar usuario..."
-        class="ml-auto bg-pitch border border-pitch-lighter rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold w-48"
-      />
+    </Card>
+
+    <div v-if="loading" class="space-y-3">
+      <div v-for="i in 4" :key="i" class="h-12 rounded-xl bg-muted animate-pulse" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>
-
-    <div v-else-if="filtered().length === 0" class="text-center py-12 text-gray-600 border border-dashed border-pitch-lighter rounded-xl">
-      No hay pronósticos
-    </div>
-
-    <div v-else class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="text-xs text-gray-500 uppercase tracking-wider">
-          <tr class="border-b border-pitch-lighter">
-            <th class="text-left py-3 px-3">Usuario</th>
-            <th class="text-left py-3 px-3">Partido</th>
-            <th class="text-center py-3 px-3">Pronóstico</th>
-            <th class="text-center py-3 px-3">Resultado</th>
-            <th class="text-center py-3 px-3">Pts</th>
-            <th class="text-center py-3 px-3">Fase</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in filtered()" :key="p.id" class="border-b border-pitch-lighter hover:bg-pitch/40">
-            <td class="py-3 px-3 text-gray-200 font-medium">
-              {{ p.user.firstName ? `${p.user.firstName} ${p.user.lastName ?? ''}` : p.user.username }}
-              <span class="text-gray-500 text-xs">@{{ p.user.username }}</span>
-            </td>
-            <td class="py-3 px-3">
-              <span v-if="p.match.homeTeam" class="text-gray-200">{{ p.match.homeTeam.name }}</span>
-              <span v-else class="text-gray-500">TBD</span>
-              <span class="text-gray-600 mx-1">vs</span>
-              <span v-if="p.match.awayTeam" class="text-gray-200">{{ p.match.awayTeam.name }}</span>
-              <span v-else class="text-gray-500">TBD</span>
-            </td>
-            <td class="py-3 px-3 text-center text-gray-200">{{ p.predictedHomeScore }} - {{ p.predictedAwayScore }}</td>
-            <td class="py-3 px-3 text-center">
-              <template v-if="p.match.status === 'FT'">
-                <span class="text-gray-200">{{ p.match.homeScore }} - {{ p.match.awayScore }}</span>
-              </template>
-              <span v-else class="text-gray-500">-</span>
-            </td>
-            <td class="py-3 px-3 text-center">
-              <span :class="p.points > 0 ? 'text-grass' : 'text-gray-500'">{{ p.points }}</span>
-            </td>
-            <td class="py-3 px-3 text-center text-gray-500 text-xs">{{ phaseLabel(p.match.phase) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Card v-else>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-border text-muted-foreground text-left">
+              <th class="py-3 px-4 font-medium">Usuario</th>
+              <th class="py-3 px-4 font-medium">Partido</th>
+              <th class="py-3 px-4 text-center font-medium">Pronóstico</th>
+              <th class="py-3 px-4 text-center font-medium">Resultado</th>
+              <th class="py-3 px-4 text-center font-medium">Pts</th>
+              <th class="py-3 px-4 text-center font-medium">Fase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in filtered" :key="p.id" class="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+              <td class="py-3 px-4">
+                <span class="text-foreground font-medium">{{ p.user.firstName ? `${p.user.firstName} ${p.user.lastName ?? ''}` : p.user.username }}</span>
+                <span class="text-muted-foreground text-xs ml-1">@{{ p.user.username }}</span>
+              </td>
+              <td class="py-3 px-4 text-foreground">
+                <span v-if="p.match?.homeTeam" class="text-foreground">{{ p.match.homeTeam.name }}</span>
+                <span v-else class="text-muted-foreground">TBD</span>
+                <span class="text-muted-foreground mx-1">vs</span>
+                <span v-if="p.match?.awayTeam" class="text-foreground">{{ p.match.awayTeam.name }}</span>
+                <span v-else class="text-muted-foreground">TBD</span>
+              </td>
+              <td class="py-3 px-4 text-center text-foreground tabular-nums">{{ p.predictedHomeScore }} - {{ p.predictedAwayScore }}</td>
+              <td class="py-3 px-4 text-center">
+                <template v-if="p.match?.status === 'FT'">
+                  <span class="text-foreground tabular-nums">{{ p.match.homeScore }} - {{ p.match.awayScore }}</span>
+                </template>
+                <span v-else class="text-muted-foreground">-</span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <Badge :variant="p.points > 0 ? 'grass' : 'outline'">{{ p.points }}</Badge>
+              </td>
+              <td class="py-3 px-4 text-center text-muted-foreground text-xs">{{ phaseLabel(p.match?.phase) }}</td>
+            </tr>
+            <tr v-if="filtered.length === 0">
+              <td colspan="6" class="text-center py-12 text-muted-foreground">No hay pronósticos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   </div>
 </template>

@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { Search, Shield, Swords, ChartLine } from '@lucide/vue'
+import { Button, Card, CardContent, Badge, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -15,10 +17,7 @@ async function fetchUsers() {
   const res = await fetch(`/api/admin/users${q}`, {
     headers: { Authorization: `Bearer ${auth.token}` },
   })
-  if (res.status === 403) {
-    router.push('/dashboard')
-    return
-  }
+  if (res.status === 403) { router.push('/dashboard'); return }
   users.value = await res.json()
   loading.value = false
 }
@@ -42,50 +41,74 @@ onMounted(fetchUsers)
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gold">Usuarios</h1>
-      <div class="flex items-center gap-3">
-        <RouterLink to="/admin/predictions" class="text-sm text-gray-400 hover:text-gold border border-pitch-lighter px-3 py-1.5 rounded-lg transition">Pronósticos</RouterLink>
-        <RouterLink to="/admin/matches" class="text-sm text-gray-400 hover:text-gold border border-pitch-lighter px-3 py-1.5 rounded-lg transition">Partidos</RouterLink>
-        <input v-model="search" @input="fetchUsers" placeholder="Buscar..." class="bg-pitch border border-pitch-lighter rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 w-64 focus:outline-none focus:ring-2 focus:ring-gold" />
+  <div class="animate-fade-in">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">Panel Admin</h1>
+        <p class="text-sm text-muted-foreground mt-1">Gestión de usuarios del sistema</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <RouterLink to="/admin/predictions">
+          <Button variant="outline" size="sm"><ChartLine class="w-4 h-4" /> Pronósticos</Button>
+        </RouterLink>
+        <RouterLink to="/admin/matches">
+          <Button variant="outline" size="sm"><Swords class="w-4 h-4" /> Partidos</Button>
+        </RouterLink>
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>
+    <Card>
+      <div class="border-b border-border px-4 sm:px-6 py-3 flex items-center gap-3">
+        <div class="relative flex-1 max-w-xs">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            v-model="search"
+            @input="fetchUsers"
+            placeholder="Buscar usuario..."
+            class="w-full h-9 rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+      </div>
+      <CardContent class="p-0">
+        <div v-if="loading" class="p-8 text-center text-muted-foreground animate-pulse">Cargando usuarios...</div>
 
-    <div v-else class="bg-pitch-light rounded-xl border border-pitch-lighter overflow-hidden">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-pitch-lighter text-gray-500 text-left">
-            <th class="px-4 py-3 font-medium">ID</th>
-            <th class="px-4 py-3 font-medium">Usuario</th>
-            <th class="px-4 py-3 font-medium">Email</th>
-            <th class="px-4 py-3 font-medium">Nombre</th>
-            <th class="px-4 py-3 font-medium">Rol</th>
-            <th class="px-4 py-3 font-medium">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="u in users" :key="u.id" class="border-b border-pitch-lighter last:border-0 hover:bg-pitch/50">
-            <td class="px-4 py-3 text-gray-400">{{ u.id }}</td>
-            <td class="px-4 py-3 text-gray-200 font-medium">{{ u.username }}</td>
-            <td class="px-4 py-3 text-gray-400">{{ u.email }}</td>
-            <td class="px-4 py-3 text-gray-400">{{ u.firstName || '' }} {{ u.lastName || '' }}</td>
-            <td class="px-4 py-3">
-              <span :class="u.role === 'ADMIN' ? 'bg-gold/20 text-gold' : 'bg-grass/20 text-grass'" class="px-2 py-0.5 rounded-md text-xs font-medium">{{ u.role }}</span>
-            </td>
-            <td class="px-4 py-3">
-              <button @click="toggleRole(u.id, u.role)" class="text-xs px-3 py-1 rounded-lg border border-pitch-lighter text-gray-400 hover:text-gold hover:border-gold transition cursor-pointer">
-                {{ u.role === 'ADMIN' ? 'Quitar admin' : 'Hacer admin' }}
-              </button>
-            </td>
-          </tr>
-          <tr v-if="users.length === 0">
-            <td colspan="6" class="px-4 py-8 text-center text-gray-600">No hay usuarios</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <Table v-else>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Usuario</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Rol</TableHead>
+              <TableHead class="text-right">Acción</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="u in users" :key="u.id">
+              <TableCell class="text-muted-foreground">{{ u.id }}</TableCell>
+              <TableCell class="font-medium text-foreground">{{ u.username }}</TableCell>
+              <TableCell class="text-muted-foreground">{{ u.email }}</TableCell>
+              <TableCell class="text-muted-foreground">{{ u.firstName || '' }} {{ u.lastName || '' }}</TableCell>
+              <TableCell>
+                <Badge :variant="u.role === 'ADMIN' ? 'gold' : 'secondary'">{{ u.role }}</Badge>
+              </TableCell>
+              <TableCell class="text-right">
+                <Button
+                  :variant="u.role === 'ADMIN' ? 'destructive' : 'outline'"
+                  size="sm"
+                  @click="toggleRole(u.id, u.role)"
+                >
+                  <Shield class="w-3 h-3" />
+                  {{ u.role === 'ADMIN' ? 'Quitar admin' : 'Hacer admin' }}
+                </Button>
+              </TableCell>
+            </TableRow>
+            <TableRow v-if="users.length === 0">
+              <TableCell colspan="6" class="text-center py-8 text-muted-foreground">No hay usuarios</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   </div>
 </template>

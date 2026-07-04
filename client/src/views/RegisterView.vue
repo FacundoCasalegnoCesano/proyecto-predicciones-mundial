@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { UserPlus, ArrowRight, Trophy } from '@lucide/vue'
+import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -9,49 +11,61 @@ const username = ref('')
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
 
 async function handleSubmit() {
   error.value = ''
+  loading.value = true
   try {
     await auth.register(username.value, email.value, password.value)
     router.push('/dashboard')
   } catch (e: any) {
     error.value = e.message
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-[70vh]">
-    <form @submit.prevent="handleSubmit" class="w-full max-w-sm bg-pitch-light rounded-xl border border-pitch-lighter p-8 space-y-5">
-      <div class="text-center">
-        <div class="text-4xl mb-2">🏆</div>
-        <h1 class="text-2xl font-bold text-gold">Crear cuenta</h1>
-      </div>
+  <div class="flex items-center justify-center min-h-[70vh] animate-fade-in">
+    <Card class="w-full max-w-sm">
+      <CardContent class="p-8 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/5 flex items-center justify-center mx-auto ring-2 ring-gold/20">
+            <Trophy class="w-7 h-7 text-gold" />
+          </div>
+          <h1 class="text-2xl font-bold text-foreground">Crear cuenta</h1>
+          <p class="text-sm text-muted-foreground">Registrate para empezar a pronosticar</p>
+        </div>
 
-      <p v-if="error" class="text-sm text-red-400 bg-red-900/30 rounded-lg px-3 py-2">{{ error }}</p>
+        <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5">{{ error }}</div>
 
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-400">Usuario</label>
-        <input v-model="username" type="text" required minlength="3" class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-      </div>
+        <form @submit.prevent="handleSubmit" class="space-y-4">
+          <div class="space-y-2">
+            <Label for="username">Usuario</Label>
+            <Input id="username" v-model="username" type="text" placeholder="usuario" required minlength="3" />
+          </div>
+          <div class="space-y-2">
+            <Label for="email">Email</Label>
+            <Input id="email" v-model="email" type="email" placeholder="tu@email.com" required />
+          </div>
+          <div class="space-y-2">
+            <Label for="password">Contraseña</Label>
+            <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="6" />
+          </div>
+          <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
+            <UserPlus v-if="!loading" class="w-4 h-4" />
+            {{ loading ? 'Registrando...' : 'Registrarse' }}
+            <ArrowRight v-if="!loading" class="w-4 h-4" />
+          </Button>
+        </form>
 
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-400">Email</label>
-        <input v-model="email" type="email" required class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-400">Contraseña</label>
-        <input v-model="password" type="password" required minlength="6" class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-      </div>
-
-      <button type="submit" class="w-full py-2.5 bg-gold hover:bg-gold-light text-pitch font-bold rounded-lg transition cursor-pointer">Registrarse</button>
-
-      <p class="text-sm text-gray-500 text-center">
-        ¿Ya tenés cuenta?
-        <router-link to="/login" class="text-gold hover:text-gold-light transition">Iniciá sesión</router-link>
-      </p>
-    </form>
+        <p class="text-sm text-muted-foreground text-center">
+          ¿Ya tenés cuenta?
+          <RouterLink to="/login" class="text-gold hover:text-gold-light transition font-medium">Iniciá sesión</RouterLink>
+        </p>
+      </CardContent>
+    </Card>
   </div>
 </template>
