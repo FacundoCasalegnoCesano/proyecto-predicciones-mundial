@@ -15,8 +15,14 @@ model User {
   firstName    String?
   lastName     String?
   role         String   @default("USER")
-  pointsEarned Int      @default(0)
-  createdAt    DateTime @default(now())
+  pointsEarned            Int      @default(0)
+  totalPredictions        Int      @default(0)
+  exactPredictions        Int      @default(0)
+  correctWinnerPredictions Int     @default(0)
+  currentStreak           Int      @default(0)
+  maxStreak               Int      @default(0)
+  avgPoints               Float    @default(0)
+  createdAt               DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   predictions Prediction[]
