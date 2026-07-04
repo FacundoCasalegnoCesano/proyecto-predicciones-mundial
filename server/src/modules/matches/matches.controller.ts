@@ -15,7 +15,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const data = createMatchSchema.parse(req.body)
-    const match = await createMatch(data)
+    const match = await createMatch({ ...data, adminUserId: req.user!.userId })
     res.status(201).json(match)
   } catch (err) {
     next(err)
@@ -25,7 +25,7 @@ export async function create(req: Request, res: Response, next: NextFunction): P
 export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const matchId = Number(req.params['id'])
-    const result = await updateMatch(matchId, req.body)
+    const result = await updateMatch(matchId, req.body, req.user!.userId)
     res.json(result)
   } catch (err) {
     next(err)

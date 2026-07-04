@@ -25,7 +25,7 @@ export async function mine(req: Request, res: Response, next: NextFunction): Pro
 
 export async function calculate(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = await calculateAllPoints()
+    const result = await calculateAllPoints(req.user!.userId)
     getIO().emit('ranking_update')
     res.json(result)
   } catch (err) {

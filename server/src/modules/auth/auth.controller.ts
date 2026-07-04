@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
-import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from './auth.validation.js'
-import { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount } from './auth.service.js'
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.validation.js'
+import { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount, forgotPassword, resetPassword } from './auth.service.js'
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -55,6 +55,26 @@ export async function deleteAccountHandler(req: Request, res: Response, next: Ne
   try {
     await deleteAccount(req.user!.userId)
     res.json({ message: 'Account deleted' })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function forgotPasswordHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = forgotPasswordSchema.parse(req.body)
+    const result = await forgotPassword(data.email)
+    res.json(result)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function resetPasswordHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = resetPasswordSchema.parse(req.body)
+    await resetPassword(data.token, data.password)
+    res.json({ message: 'Password reset successfully' })
   } catch (err) {
     next(err)
   }
