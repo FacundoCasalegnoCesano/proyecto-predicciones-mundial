@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 </script>
 
 <template>
-  <div :class="cn('rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-200', $attrs.class)">
+  <div :class="cn('rounded-xl border bg-card text-card-foreground shadow-sm transition-[border-color,box-shadow,transform] duration-200', $attrs.class)">
     <slot />
   </div>
 </template>

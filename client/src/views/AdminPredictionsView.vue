@@ -82,7 +82,7 @@ onMounted(fetchPredictions)
             v-for="p in PHASES" :key="p.key"
             @click="phaseFilter = p.key"
             :class="phaseFilter === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-card text-muted-foreground hover:text-foreground border border-border'"
-            class="px-3 py-1.5 rounded-lg text-xs transition-all duration-200 cursor-pointer"
+            class="px-3 py-1.5 rounded-lg text-xs transition-[color,background-color,border-color] duration-200 cursor-pointer"
           >
             {{ p.label }}
           </button>

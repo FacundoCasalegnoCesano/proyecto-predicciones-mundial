@@ -74,7 +74,7 @@ function rankBadge(rank: number) {
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-foreground">Tabla de Posiciones</h1>
-        <p class="text-sm text-muted-foreground mt-1">Ranking de usuarios por puntos de pronósticos</p>
+        <p class="text-sm text-muted-foreground mt-1">Ranking por puntos acumulados</p>
       </div>
       <div class="flex items-center gap-2 text-xs text-muted-foreground">
         <RefreshCw class="w-3 h-3" />
@@ -97,7 +97,7 @@ function rankBadge(rank: number) {
             v-for="u in users"
             :key="u.id"
             :to="`/user/${u.id}/predictions`"
-            class="flex items-center px-4 sm:px-6 py-4 border-b border-border last:border-0 hover:bg-muted/30 transition-all duration-200 group"
+            class="flex items-center px-4 sm:px-6 py-4 border-b border-border last:border-0 hover:bg-muted/30 transition-[background-color] duration-200 group"
           >
             <span class="w-8 sm:w-12 flex items-center gap-1">
               <component :is="rankIcon(u.rank)" v-if="rankIcon(u.rank)" :class="rankColor(u.rank) + ' w-4 h-4 sm:w-5 sm:h-5'" />

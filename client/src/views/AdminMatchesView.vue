@@ -112,7 +112,7 @@ onMounted(fetchData)
         v-for="p in phases" :key="p.key"
         @click="onPhaseChange(p.key)"
         :class="activePhase === p.key ? 'bg-gold text-pitch font-semibold ring-2 ring-gold/30' : 'bg-card text-muted-foreground hover:text-foreground border border-border'"
-        class="px-4 py-2 rounded-lg text-sm transition-all duration-200 cursor-pointer"
+        class="px-4 py-2 rounded-lg text-sm transition-[color,background-color,border-color] duration-200 cursor-pointer"
       >
         {{ p.label }}
       </button>
@@ -162,7 +162,7 @@ onMounted(fetchData)
       </div>
 
       <div v-else class="space-y-2">
-        <Card v-for="m in filtered" :key="m.id" class="transition-all duration-200 hover:border-gold/20">
+        <Card v-for="m in filtered" :key="m.id" class="transition-[border-color,box-shadow] duration-200 hover:border-gold/20">
           <div class="px-4 sm:px-5 py-3 flex flex-col sm:flex-row items-center gap-3">
             <div class="flex items-center gap-3 w-full sm:w-[28%] justify-center sm:justify-end">
               <template v-if="m.homeTeam">

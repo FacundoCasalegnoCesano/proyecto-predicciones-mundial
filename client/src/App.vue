@@ -52,7 +52,7 @@ function closeMenu() { menuOpen.value = false }
       <nav class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-2 sm:gap-6">
         <RouterLink to="/" class="font-bold text-sm sm:text-lg tracking-wide text-gold hover:text-gold-light transition shrink-0 flex items-center gap-2">
           <Trophy class="w-5 h-5" />
-          <span class="hidden sm:inline">Mundial Predictions</span>
+          <span class="hidden sm:inline">Prode Mundial 2026</span>
         </RouterLink>
 
         <button @click="menuOpen = !menuOpen" class="sm:hidden ml-auto text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-lg hover:bg-accent transition" aria-label="Menu">
@@ -129,7 +129,7 @@ function closeMenu() { menuOpen.value = false }
 
 <style scoped>
 .page-enter-active, .page-leave-active {
-  transition: all 0.2s ease-out;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .page-enter-from {
   opacity: 0;

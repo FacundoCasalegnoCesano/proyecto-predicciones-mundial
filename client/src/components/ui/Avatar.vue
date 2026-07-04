@@ -18,7 +18,7 @@ const initial = computed(() => (props.name || '?').charAt(0).toUpperCase())
 </script>
 
 <template>
-  <div :class="cn('rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center font-bold text-gold shrink-0 ring-2 ring-gold/20 transition-all duration-200 hover:ring-gold/40', sizeClass, props.class)">
+  <div :class="cn('rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center font-bold text-gold shrink-0 ring-2 ring-gold/20 transition-[ring-color,box-shadow,transform] duration-200 hover:ring-gold/40', sizeClass, props.class)">
     {{ initial }}
   </div>
 </template>

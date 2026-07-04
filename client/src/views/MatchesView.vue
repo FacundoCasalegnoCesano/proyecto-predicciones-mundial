@@ -86,7 +86,7 @@ onUnmounted(() => {
   <div class="animate-fade-in">
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-foreground">Partidos</h1>
-      <p class="text-sm text-muted-foreground mt-1">Resultados y próximos encuentros del Mundial</p>
+      <p class="text-sm text-muted-foreground mt-1">Resultados, fixture y pronósticos</p>
     </div>
 
     <div class="mb-6">
