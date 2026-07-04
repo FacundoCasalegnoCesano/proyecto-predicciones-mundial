@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js'
 import { AppError } from '../../middlewares/errorHandler.js'
+import { createNotification } from '../notifications/notifications.service.js'
 
 export async function listUsers(search?: string) {
   const where = search
@@ -39,6 +40,8 @@ export async function updateUserRole(userId: number, role: string) {
     where: { id: userId },
     data: { role },
   })
+
+  await createNotification(userId, 'role_changed', `Tu rol ha sido cambiado a ${role === 'ADMIN' ? 'Administrador' : 'Usuario'}`)
 
   return { id: updated.id, username: updated.username, email: updated.email, firstName: updated.firstName, lastName: updated.lastName, role: updated.role }
 }

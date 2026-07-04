@@ -1,15 +1,25 @@
 import { prisma } from '../../config/prisma.js'
+import { createNotification } from '../notifications/notifications.service.js'
 
 export async function upsertPrediction(userId: number, matchId: number, homeScore: number, awayScore: number) {
-  const match = await prisma.match.findUnique({ where: { id: matchId } })
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+    include: { homeTeam: true, awayTeam: true },
+  })
   if (!match) throw new Error('Match not found')
   if (match.status !== 'scheduled') throw new Error('Match already started or finished')
 
-  return prisma.prediction.upsert({
+  const result = await prisma.prediction.upsert({
     where: { userId_matchId: { userId, matchId } },
     update: { predictedHomeScore: homeScore, predictedAwayScore: awayScore },
     create: { userId, matchId, predictedHomeScore: homeScore, predictedAwayScore: awayScore },
   })
+
+  const homeName = match.homeTeam?.name ?? 'Equipo local'
+  const awayName = match.awayTeam?.name ?? 'Equipo visitante'
+  await createNotification(userId, 'prediction_saved', `Pronóstico guardado: ${homeName} ${homeScore}-${awayScore} ${awayName}`)
+
+  return result
 }
 
 export async function getMyPredictions(userId: number) {
@@ -121,7 +131,7 @@ async function _updateUserStats(userId: number) {
   })
 }
 
-export async function calculateAllPoints() {
+export async function calculateAllPoints(adminUserId?: number) {
   const finished = await prisma.match.findMany({
     where: { status: 'FT', homeScore: { not: null }, awayScore: { not: null } },
   })
@@ -131,6 +141,10 @@ export async function calculateAllPoints() {
   for (const match of finished) {
     const updated = await calculatePointsForMatch(match.id)
     totalUpdated += updated
+  }
+
+  if (adminUserId) {
+    await createNotification(adminUserId, 'points_recalculated', `Puntos recalculados: ${totalUpdated} predicciones actualizadas`)
   }
 
   return { updatedPredictions: totalUpdated }

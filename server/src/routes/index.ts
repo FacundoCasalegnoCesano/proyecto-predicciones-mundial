@@ -4,6 +4,7 @@ import adminRoutes from '../modules/admin/admin.routes.js'
 import matchesRoutes from '../modules/matches/matches.routes.js'
 import teamsRoutes from '../modules/teams/teams.routes.js'
 import predictionsRoutes from '../modules/predictions/predictions.routes.js'
+import notificationsRoutes from '../modules/notifications/notifications.routes.js'
 
 const router = Router()
 
@@ -12,5 +13,6 @@ router.use('/admin', adminRoutes)
 router.use('/matches', matchesRoutes)
 router.use('/teams', teamsRoutes)
 router.use('/predictions', predictionsRoutes)
+router.use('/notifications', notificationsRoutes)
 
 export default router
