@@ -55,7 +55,7 @@ function closeMenu() { menuOpen.value = false }
           <span class="hidden sm:inline">Prode Mundial 2026</span>
         </RouterLink>
 
-        <button @click="menuOpen = !menuOpen" class="sm:hidden ml-auto text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-lg hover:bg-accent transition" aria-label="Menú de navegación" aria-expanded="menuOpen" aria-controls="mobile-menu">
+        <button @click="menuOpen = !menuOpen" class="sm:hidden ml-auto text-muted-foreground hover:text-foreground cursor-pointer p-1 rounded-lg hover:bg-accent transition" aria-label="Menú de navegación" :aria-expanded="menuOpen" aria-controls="mobile-menu">
           <Menu v-if="!menuOpen" class="w-5 h-5" />
           <X v-else class="w-5 h-5" />
         </button>
