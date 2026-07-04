@@ -211,3 +211,19 @@ export async function getAllPredictions() {
     },
   }))
 }
+
+export async function getUserStats(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      totalPredictions: true,
+      exactPredictions: true,
+      correctWinnerPredictions: true,
+      currentStreak: true,
+      maxStreak: true,
+      avgPoints: true,
+    },
+  })
+
+  return user ?? { totalPredictions: 0, exactPredictions: 0, correctWinnerPredictions: 0, currentStreak: 0, maxStreak: 0, avgPoints: 0 }
+}
