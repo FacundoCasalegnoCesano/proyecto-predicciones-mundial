@@ -94,7 +94,7 @@ onUnmounted(() => {
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-muted animate-pulse" />
+      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%] animate-shimmer" />
     </div>
 
     <template v-else>
