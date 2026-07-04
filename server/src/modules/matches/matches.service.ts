@@ -1,4 +1,6 @@
 import { prisma } from '../../config/prisma.js'
+import { calculatePointsForMatch } from '../predictions/predictions.service.js'
+import { getIO } from '../../config/socket.js'
 
 function mapMatch(m: any) {
   return {
@@ -52,6 +54,8 @@ export async function createMatch(data: {
 }
 
 export async function updateMatch(id: number, data: { homeScore?: number | null; awayScore?: number | null; status?: string; homeTeamId?: number; awayTeamId?: number }) {
+  const oldMatch = await prisma.match.findUnique({ where: { id } })
+
   const match = await prisma.match.update({
     where: { id },
     data: {
@@ -63,6 +67,14 @@ export async function updateMatch(id: number, data: { homeScore?: number | null;
     },
     include: { homeTeam: true, awayTeam: true },
   })
+
+  const becameFt = match.status === 'FT' && match.homeScore !== null && match.awayScore !== null
+  const scoreChanged = oldMatch?.homeScore !== match.homeScore || oldMatch?.awayScore !== match.awayScore
+
+  if (becameFt || (match.status === 'FT' && scoreChanged)) {
+    await calculatePointsForMatch(match.id)
+    getIO().emit('ranking_update')
+  }
 
   return mapMatch(match)
 }
