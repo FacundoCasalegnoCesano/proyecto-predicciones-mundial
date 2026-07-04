@@ -110,7 +110,7 @@ onUnmounted(() => {
   <div class="animate-fade-in">
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-foreground">Mis Pronósticos</h1>
-      <p class="text-sm text-muted-foreground mt-1">Hacé tus predicciones y seguí tus puntos</p>
+      <p class="text-sm text-muted-foreground mt-1">Tus predicciones y puntuación</p>
     </div>
 
     <div class="mb-6">

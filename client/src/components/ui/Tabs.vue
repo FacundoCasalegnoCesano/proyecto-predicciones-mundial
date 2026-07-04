@@ -21,7 +21,7 @@ const emit = defineEmits<{
         :key="tab.value"
         :value="tab.value"
         :class="cn(
-          'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all duration-200',
+          'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-[color,background-color,border-color] duration-200',
           'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
           'data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',

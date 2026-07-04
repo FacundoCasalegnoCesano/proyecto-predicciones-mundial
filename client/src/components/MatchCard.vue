@@ -60,7 +60,7 @@ function onAwayInput(e: Event, matchId: number) {
 </script>
 
 <template>
-  <Card class="group transition-all duration-200 hover:border-gold/30 hover:shadow-sm hover:shadow-gold/5 animate-slide-up">
+  <Card class="group transition-[border-color,box-shadow,transform] duration-200 hover:border-gold/30 hover:shadow-sm hover:shadow-gold/5 animate-slide-up">
     <div class="px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row items-center gap-3">
       <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-[28%] justify-center sm:justify-end min-w-0 order-1 sm:order-none">
         <span class="text-xs sm:text-sm text-foreground font-medium truncate max-w-[120px] sm:max-w-none">{{ match.homeTeam?.name ?? 'Pendiente' }}</span>
@@ -87,7 +87,7 @@ function onAwayInput(e: Event, matchId: number) {
           <button
             @click="emit('save', match.id)"
             :disabled="saving || predictionValue?.home === undefined || predictionValue?.away === undefined"
-            class="ml-1 sm:ml-2 text-[10px] sm:text-xs px-2.5 py-1.5 rounded-lg bg-gold text-pitch font-semibold hover:bg-gold-light transition-all duration-200 disabled:opacity-40 cursor-pointer active:scale-95 whitespace-nowrap"
+            class="ml-1 sm:ml-2 text-[10px] sm:text-xs px-2.5 py-1.5 rounded-lg bg-gold text-pitch font-semibold hover:bg-gold-light transition-[color,background-color,opacity,transform] duration-200 disabled:opacity-40 cursor-pointer active:scale-95 whitespace-nowrap"
           >
             {{ saving ? '...' : (userPrediction ? 'Actualizar' : 'Pronosticar') }}
           </button>

@@ -19,7 +19,7 @@ const emit = defineEmits<{
       :class="active === p.key
         ? 'bg-gold text-pitch font-semibold ring-2 ring-gold/30 scale-105'
         : 'bg-card text-muted-foreground hover:text-foreground border border-border hover:border-gold/30'"
-      class="px-4 py-2 rounded-lg text-sm transition-all duration-200 cursor-pointer"
+      class="px-4 py-2 rounded-lg text-sm transition-[color,background-color,border-color] duration-200 cursor-pointer"
     >
       {{ p.label }}
     </button>

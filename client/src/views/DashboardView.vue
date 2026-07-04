@@ -24,8 +24,8 @@ onMounted(fetchStats)
 
 const quickLinks = [
   { to: '/matches', icon: Swords, title: 'Partidos', desc: 'Resultados y próximos encuentros', gradient: 'from-gold/20 to-gold/5', delay: 0 },
-  { to: '/predictions', icon: ChartLine, title: 'Mis Pronósticos', desc: 'Hacé tus predicciones y seguí tus puntos', gradient: 'from-grass/20 to-grass/5', delay: 100 },
-  { to: '/standings', icon: Trophy, title: 'Posiciones', desc: 'Ranking de usuarios por puntos acumulados', gradient: 'from-purple-500/20 to-purple-500/5', delay: 200 },
+  { to: '/predictions', icon: ChartLine, title: 'Mis Pronósticos', desc: 'Actualizá tus pronósticos', gradient: 'from-grass/20 to-grass/5', delay: 100 },
+  { to: '/standings', icon: Trophy, title: 'Posiciones', desc: 'Ranking de puntos acumulados', gradient: 'from-purple-500/20 to-purple-500/5', delay: 200 },
 ]
 
 const statCards = [
@@ -44,7 +44,7 @@ const statCards = [
       <h1 class="text-3xl font-bold text-foreground tracking-tight">
         Bienvenido, <span class="text-gold">{{ auth.user?.firstName || auth.user?.username }}</span>
       </h1>
-      <p class="text-muted-foreground mt-1">Panel de control del Mundial 2026</p>
+      <p class="text-muted-foreground mt-1">Seguí los partidos, pronosticá resultados y subí en la tabla</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -53,7 +53,7 @@ const statCards = [
         :key="link.to"
         :to="link.to"
         :style="{ animationDelay: link.delay + 'ms' }"
-        class="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-gold/5 animate-slide-up"
+        class="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br p-5 transition-[transform,box-shadow] duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-gold/5 animate-slide-up"
         :class="link.gradient"
       >
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -83,7 +83,7 @@ const statCards = [
           <div
             v-for="s in statCards"
             :key="s.key"
-            class="rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:border-gold/30 hover:shadow-sm hover:shadow-gold/5"
+            class="rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] duration-200 hover:border-gold/30 hover:shadow-sm hover:shadow-gold/5"
           >
             <div class="flex items-center gap-2 mb-3">
               <div :class="s.bg + ' w-8 h-8 rounded-lg flex items-center justify-center'">
