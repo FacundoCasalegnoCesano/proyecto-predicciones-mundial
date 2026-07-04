@@ -13,6 +13,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
 export async function read(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const notificationId = Number(req.params['id'])
+    if (isNaN(notificationId)) throw new Error('Invalid notification id')
     const result = await markAsRead(notificationId, req.user!.userId)
     res.json(result)
   } catch (err) {

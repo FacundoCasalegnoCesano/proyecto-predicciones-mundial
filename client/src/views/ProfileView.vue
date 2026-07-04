@@ -109,7 +109,7 @@ async function changePassword() {
         </div>
         <div class="space-y-2">
           <Label for="newPassword">Nueva contraseña</Label>
-          <Input id="newPassword" v-model="newPassword" type="password" minlength="6" />
+          <Input id="newPassword" v-model="newPassword" type="password" minlength="8" />
         </div>
         <Button variant="gold" size="sm" :disabled="passwordLoading || !currentPassword || !newPassword" @click="changePassword">
           <KeyRound class="w-4 h-4" /> {{ passwordLoading ? 'Cambiando...' : 'Cambiar contraseña' }}
