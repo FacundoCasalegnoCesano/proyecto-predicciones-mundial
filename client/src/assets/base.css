@@ -79,3 +79,4 @@ body {
   @apply transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
+

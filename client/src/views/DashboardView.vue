@@ -25,7 +25,7 @@ onMounted(fetchStats)
 const quickLinks = [
   { to: '/matches', icon: Swords, title: 'Partidos', desc: 'Resultados y próximos encuentros', gradient: 'from-gold/20 to-gold/5', delay: 0 },
   { to: '/predictions', icon: ChartLine, title: 'Mis Pronósticos', desc: 'Actualizá tus pronósticos', gradient: 'from-grass/20 to-grass/5', delay: 100 },
-  { to: '/standings', icon: Trophy, title: 'Posiciones', desc: 'Ranking de puntos acumulados', gradient: 'from-purple-500/20 to-purple-500/5', delay: 200 },
+  { to: '/standings', icon: Trophy, title: 'Posiciones', desc: 'Ranking de puntos acumulados', gradient: 'from-gold/20 to-gold/5', delay: 200 },
 ]
 
 const statCards = [
@@ -72,7 +72,7 @@ const statCards = [
       </div>
       <CardContent class="p-6">
         <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <div v-for="i in 6" :key="i" class="h-24 rounded-xl bg-muted animate-pulse" />
+          <div v-for="i in 6" :key="i" class="h-24 rounded-xl bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%] animate-shimmer" />
         </div>
 
         <div v-else-if="!stats" class="text-center py-8 text-muted-foreground">

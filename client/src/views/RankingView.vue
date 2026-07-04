@@ -84,7 +84,9 @@ function rankBadge(rank: number) {
 
     <Card>
       <CardContent class="p-0">
-        <div v-if="loading" class="p-8 text-center text-muted-foreground animate-pulse">Cargando posiciones...</div>
+        <div v-if="loading" class="space-y-3 p-4">
+          <div v-for="i in 5" :key="i" class="h-14 rounded-xl bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%] animate-shimmer" />
+        </div>
 
         <template v-else>
           <div class="hidden sm:flex items-center px-6 py-3 border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-medium">
