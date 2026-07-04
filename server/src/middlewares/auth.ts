@@ -2,9 +2,10 @@ import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { AppError } from './errorHandler.js'
 
-const _secret = process.env['JWT_SECRET']
-if (!_secret) throw new Error('JWT_SECRET environment variable is required')
-const secret: string = _secret
+const secret: string = process.env['JWT_SECRET'] ?? 'fallback-dev-only-change-me'
+if (!process.env['JWT_SECRET']) {
+  console.warn('WARNING: JWT_SECRET not set, using insecure fallback. Set it in production.')
+}
 
 export interface JwtPayload {
   userId: number
