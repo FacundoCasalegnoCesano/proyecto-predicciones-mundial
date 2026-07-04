@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
 import { listMatches, createMatch, updateMatch } from './matches.service.js'
-import { createMatchSchema } from './matches.validation.js'
+import { createMatchSchema, updateMatchSchema } from './matches.validation.js'
 
 export async function list(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -25,7 +25,9 @@ export async function create(req: Request, res: Response, next: NextFunction): P
 export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const matchId = Number(req.params['id'])
-    const result = await updateMatch(matchId, req.body, req.user!.userId)
+    if (isNaN(matchId)) throw new Error('Invalid match id')
+    const data = updateMatchSchema.parse(req.body)
+    const result = await updateMatch(matchId, data, req.user!.userId)
     res.json(result)
   } catch (err) {
     next(err)

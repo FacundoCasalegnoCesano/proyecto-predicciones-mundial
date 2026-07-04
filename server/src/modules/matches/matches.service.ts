@@ -59,7 +59,7 @@ export async function createMatch(data: {
   return mapMatch(match)
 }
 
-export async function updateMatch(id: number, data: { homeScore?: number | null; awayScore?: number | null; status?: string; homeTeamId?: number; awayTeamId?: number }, adminUserId?: number) {
+export async function updateMatch(id: number, data: { homeScore?: number | null; awayScore?: number | null; status?: string; homeTeamId?: number | null; awayTeamId?: number | null }, adminUserId?: number) {
   const oldMatch = await prisma.match.findUnique({ where: { id } })
 
   const match = await prisma.match.update({

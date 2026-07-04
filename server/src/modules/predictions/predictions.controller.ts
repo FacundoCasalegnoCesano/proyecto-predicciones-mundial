@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction } from 'express'
 import { upsertPrediction, getMyPredictions, calculateAllPoints, getRanking, getAllPredictions, getUserPredictions, getUserStats } from './predictions.service.js'
+import { upsertPredictionSchema, userIdParamSchema } from './predictions.validation.js'
 import { getIO } from '../../config/socket.js'
 
 export async function save(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { matchId, homeScore, awayScore } = req.body
+    const { matchId, homeScore, awayScore } = upsertPredictionSchema.parse(req.body)
     const result = await upsertPrediction(req.user!.userId, matchId, homeScore, awayScore)
     console.log('Emitting prediction_updated')
     getIO().emit('prediction_updated')
@@ -62,7 +63,7 @@ export async function stats(req: Request, res: Response, next: NextFunction): Pr
 
 export async function userPredictions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = Number(req.params['userId'])
+    const { userId } = userIdParamSchema.parse(req.params)
     const result = await getUserPredictions(userId)
     res.json(result)
   } catch (err) {

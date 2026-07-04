@@ -11,5 +11,7 @@ export const createMatchSchema = z.object({
 export const updateMatchSchema = z.object({
   homeScore: z.number().int().min(0).nullable().optional(),
   awayScore: z.number().int().min(0).nullable().optional(),
+  homeTeamId: z.number().int().positive().nullable().optional(),
+  awayTeamId: z.number().int().positive().nullable().optional(),
   status: z.enum(['scheduled', 'live', 'FT', 'HT', 'PEN']).optional(),
 })

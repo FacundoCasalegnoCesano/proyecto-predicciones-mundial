@@ -1,6 +1,15 @@
 import { Router } from 'express'
+import rateLimit from 'express-rate-limit'
 import { register, login, me, updateProfileHandler, changePasswordHandler, deleteAccountHandler, forgotPasswordHandler, resetPasswordHandler } from './auth.controller.js'
 import { authenticate } from '../../middlewares/auth.js'
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos, intentá de nuevo en 15 minutos' },
+})
 
 /**
  * @openapi
@@ -34,7 +43,7 @@ const router = Router()
  *       201:
  *         description: Usuario creado
  */
-router.post('/register', register)
+router.post('/register', authLimiter, register)
 /**
  * @openapi
  * /auth/login:
@@ -55,7 +64,7 @@ router.post('/register', register)
  *       200:
  *         description: JWT token + datos del usuario
  */
-router.post('/login', login)
+router.post('/login', authLimiter, login)
 /**
  * @openapi
  * /auth/me:
@@ -90,7 +99,7 @@ router.delete('/account', authenticate, deleteAccountHandler)
  *       200:
  *         description: Email enviado si el usuario existe
  */
-router.post('/forgot-password', forgotPasswordHandler)
+router.post('/forgot-password', authLimiter, forgotPasswordHandler)
 /**
  * @openapi
  * /auth/reset-password:
