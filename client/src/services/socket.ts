@@ -4,7 +4,8 @@ let socket: Socket | null = null
 
 export function connectSocket(): Socket {
   if (!socket) {
-    socket = io('http://localhost:3000', {
+    const url = import.meta.env.VITE_WS_URL || (import.meta.env.DEV ? 'http://localhost:3000' : undefined)
+    socket = io(url, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 10,

@@ -38,6 +38,9 @@ async function handleSubmit() {
       <div class="space-y-1">
         <label class="text-sm font-medium text-gray-400">Contraseña</label>
         <input v-model="password" type="password" required class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
+        <div class="text-right">
+          <router-link to="/forgot-password" class="text-xs text-gray-500 hover:text-gold transition">Olvidé mi contraseña</router-link>
+        </div>
       </div>
 
       <button type="submit" class="w-full py-2.5 bg-gold hover:bg-gold-light text-pitch font-bold rounded-lg transition cursor-pointer">Ingresar</button>
