@@ -2,53 +2,82 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { Trophy, ArrowRight, Eye, EyeOff, LogIn } from '@lucide/vue'
+import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const auth = useAuthStore()
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
+const showPw = ref(false)
 
 async function handleSubmit() {
   error.value = ''
+  loading.value = true
   try {
     await auth.login(email.value, password.value)
     router.push('/dashboard')
   } catch (e: any) {
     error.value = e.message
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-[70vh]">
-    <form @submit.prevent="handleSubmit" class="w-full max-w-sm bg-pitch-light rounded-xl border border-pitch-lighter p-8 space-y-5">
-      <div class="text-center">
-        <div class="text-4xl mb-2">🏆</div>
-        <h1 class="text-2xl font-bold text-gold">Iniciar sesión</h1>
-      </div>
-
-      <p v-if="error" class="text-sm text-red-400 bg-red-900/30 rounded-lg px-3 py-2">{{ error }}</p>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-400">Email</label>
-        <input v-model="email" type="email" required class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-400">Contraseña</label>
-        <input v-model="password" type="password" required class="w-full px-3 py-2.5 bg-pitch border border-pitch-lighter rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent" />
-        <div class="text-right">
-          <router-link to="/forgot-password" class="text-xs text-gray-500 hover:text-gold transition">Olvidé mi contraseña</router-link>
+  <div class="flex items-center justify-center min-h-[70vh] animate-fade-in">
+    <Card class="w-full max-w-sm">
+      <CardContent class="p-8 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gold/30 to-gold/5 flex items-center justify-center mx-auto ring-2 ring-gold/20">
+            <Trophy class="w-7 h-7 text-gold" />
+          </div>
+          <h1 class="text-2xl font-bold text-foreground">Iniciar sesión</h1>
+          <p class="text-sm text-muted-foreground">Ingresá tus credenciales para continuar</p>
         </div>
-      </div>
 
-      <button type="submit" class="w-full py-2.5 bg-gold hover:bg-gold-light text-pitch font-bold rounded-lg transition cursor-pointer">Ingresar</button>
+        <Transition name="shake">
+          <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5 flex items-center gap-2">
+            <span class="i-lucide-alert-circle w-4 h-4 shrink-0" />
+            {{ error }}
+          </div>
+        </Transition>
 
-      <p class="text-sm text-gray-500 text-center">
-        ¿No tenés cuenta?
-        <router-link to="/register" class="text-gold hover:text-gold-light transition">Registrate</router-link>
-      </p>
-    </form>
+        <form @submit.prevent="handleSubmit" class="space-y-4">
+          <div class="space-y-2">
+            <Label for="email">Email</Label>
+            <Input id="email" v-model="email" type="email" placeholder="tu@email.com" required />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <Label for="password">Contraseña</Label>
+              <RouterLink to="/forgot-password" class="text-xs text-gold hover:text-gold-light transition">¿Olvidaste?</RouterLink>
+            </div>
+            <div class="relative">
+              <Input id="password" v-model="password" :type="showPw ? 'text' : 'password'" placeholder="••••••••" required />
+              <button type="button" @click="showPw = !showPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
+                <Eye v-if="!showPw" class="w-4 h-4" />
+                <EyeOff v-else class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
+            <LogIn v-if="!loading" class="w-4 h-4" />
+            {{ loading ? 'Ingresando...' : 'Ingresar' }}
+            <ArrowRight v-if="!loading" class="w-4 h-4" />
+          </Button>
+        </form>
+
+        <p class="text-sm text-muted-foreground text-center">
+          ¿No tenés cuenta?
+          <RouterLink to="/register" class="text-gold hover:text-gold-light transition font-medium">Registrate</RouterLink>
+        </p>
+      </CardContent>
+    </Card>
   </div>
 </template>

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.agents/
+.superpowers/
+docs/
+skills-lock.json
+*.log

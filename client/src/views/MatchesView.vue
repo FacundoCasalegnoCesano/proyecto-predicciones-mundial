@@ -2,57 +2,29 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { connectSocket } from '@/services/socket'
+import { toast } from 'vue-sonner'
+import { PHASES } from '@/constants'
+import PhaseTabs from '@/components/PhaseTabs.vue'
+import MatchCard from '@/components/MatchCard.vue'
+import type { MatchInfo } from '@/components/MatchCard.vue'
+import { CalendarDays } from '@lucide/vue'
 
 const auth = useAuthStore()
 
-interface Team {
-  id: number
-  name: string
-  code: string | null
-}
-
-interface Match {
-  id: number
-  phase: string
-  round: string | null
-  date: string
-  status: string
-  homeTeam: Team | null
-  awayTeam: Team | null
-  homeScore: number | null
-  awayScore: number | null
-}
-
-const matches = ref<Match[]>([])
+const matches = ref<MatchInfo[]>([])
 const predictions = ref<Record<number, { home: number; away: number }>>({})
 const saving = ref<Set<number>>(new Set())
 const loading = ref(true)
 const activePhase = ref('group')
 
-const phases = [
-  { key: 'group', label: 'Fase de Grupos' },
-  { key: 'round_of_32', label: '32avos' },
-  { key: 'round_of_16', label: 'Octavos' },
-  { key: 'quarter_final', label: 'Cuartos' },
-  { key: 'semi_final', label: 'Semis' },
-  { key: 'third_place', label: '3er Puesto' },
-  { key: 'final', label: 'Final' },
-]
-
 const filtered = computed(() => matches.value.filter((m) => m.phase === activePhase.value))
 
 const grouped = computed(() => {
-  const groups: Record<string, Match[]> = {}
+  const groups: Record<string, MatchInfo[]> = {}
   for (const m of filtered.value) {
-    if (m.status === 'scheduled') {
-      const key = 'upcoming'
-      if (!groups[key]) groups[key] = []
-      groups[key].push(m)
-    } else {
-      const key = m.round || 'resultados'
-      if (!groups[key]) groups[key] = []
-      groups[key].push(m)
-    }
+    const key = m.status === 'scheduled' ? 'upcoming' : (m.round || 'resultados')
+    if (!groups[key]) groups[key] = []
+    groups[key].push(m)
   }
   return groups
 })
@@ -81,28 +53,18 @@ async function savePrediction(matchId: number) {
   const p = predictions.value[matchId]
   if (!p || p.home === undefined || p.away === undefined) return
   saving.value.add(matchId)
-  await fetch('/api/predictions', {
+  const res = await fetch('/api/predictions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
     body: JSON.stringify({ matchId, homeScore: p.home, awayScore: p.away }),
   })
+  if (res.ok) toast.success('Pronóstico guardado')
+  else toast.error('Error al guardar el pronóstico')
   saving.value.delete(matchId)
 }
 
-function initPred(matchId: number) {
-  if (!predictions.value[matchId]) {
-    predictions.value[matchId] = { home: undefined as any, away: undefined as any }
-  }
-}
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-}
-
-function formatTime(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+function updatePrediction(matchId: number, home: number, away: number) {
+  predictions.value[matchId] = { home, away }
 }
 
 const onPredictionUpdate = () => { fetchMatches(); fetchPredictions() }
@@ -121,96 +83,44 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-2xl font-bold text-gold mb-6">Partidos</h1>
-
-    <div class="flex flex-wrap gap-2 mb-8">
-      <button
-        v-for="p in phases"
-        :key="p.key"
-        @click="activePhase = p.key"
-        :class="activePhase === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-pitch-light text-gray-400 hover:text-gold border border-pitch-lighter'"
-        class="px-4 py-2 rounded-lg text-sm transition cursor-pointer"
-      >
-        {{ p.label }}
-      </button>
+  <div class="animate-fade-in">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-foreground">Partidos</h1>
+      <p class="text-sm text-muted-foreground mt-1">Resultados y próximos encuentros del Mundial</p>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>
+    <div class="mb-6">
+      <PhaseTabs :phases="PHASES" :active="activePhase" @select="activePhase = $event" />
+    </div>
+
+    <div v-if="loading" class="space-y-3">
+      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-muted animate-pulse" />
+    </div>
 
     <template v-else>
-      <div v-if="Object.keys(grouped).length === 0" class="text-center py-12 text-gray-600">
-        No hay partidos en esta fase
+      <div v-if="Object.keys(grouped).length === 0" class="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
+        <CalendarDays class="w-8 h-8 opacity-50" />
+        <p>No hay partidos en esta fase</p>
       </div>
 
       <div v-for="(groupMatches, groupKey) in grouped" :key="groupKey" class="mb-8">
-        <h2 v-if="groupKey === 'upcoming'" class="text-sm font-medium text-gold-light mb-3 uppercase tracking-wider">Próximos</h2>
-        <h2 v-else class="text-sm font-medium text-gold-light mb-3 uppercase tracking-wider">{{ groupKey }}</h2>
+        <h2 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-1 h-4 rounded-full bg-gold" />
+          {{ groupKey === 'upcoming' ? 'Próximos' : groupKey }}
+        </h2>
 
         <div class="grid gap-3">
-          <div
+          <MatchCard
             v-for="m in groupMatches"
             :key="m.id"
-            class="bg-pitch-light border border-pitch-lighter rounded-xl px-5 py-4 flex items-center justify-between"
-          >
-            <div class="flex items-center gap-3 w-[28%] justify-end">
-              <span class="text-sm text-gray-200 font-medium truncate">{{ m.homeTeam?.name ?? 'Pendiente' }}</span>
-              <span v-if="m.homeTeam?.code" :class="'fi fi-' + m.homeTeam.code + ' text-lg leading-none'"></span>
-            </div>
-
-            <div class="flex items-center gap-2 w-[34%] justify-center">
-              <template v-if="m.status === 'scheduled' && m.homeTeam && m.awayTeam">
-                <template v-if="auth.token">
-                  <div class="flex items-center gap-1">
-                    <input
-                      :value="predictions[m.id]?.home ?? ''"
-                      @input="initPred(m.id); predictions[m.id].home = Number(($event.target as HTMLInputElement).value)"
-                      type="number" min="0" max="20"
-                      placeholder="?"
-                      class="w-10 text-center bg-pitch border border-pitch-lighter rounded-lg px-1 py-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold"
-                    />
-                    <span class="text-gray-600 text-xs">-</span>
-                    <input
-                      :value="predictions[m.id]?.away ?? ''"
-                      @input="initPred(m.id); predictions[m.id].away = Number(($event.target as HTMLInputElement).value)"
-                      type="number" min="0" max="20"
-                      placeholder="?"
-                      class="w-10 text-center bg-pitch border border-pitch-lighter rounded-lg px-1 py-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold"
-                    />
-                  </div>
-                  <button
-                    @click="savePrediction(m.id)"
-                    :disabled="saving.has(m.id) || predictions[m.id]?.home === undefined || predictions[m.id]?.away === undefined"
-                    class="ml-2 text-xs px-2 py-1 rounded-lg bg-gold text-pitch font-semibold hover:bg-gold-light transition disabled:opacity-40 cursor-pointer"
-                  >
-                    {{ saving.has(m.id) ? '...' : (predictions[m.id]?.home !== undefined ? 'Guardar' : 'Pronosticar') }}
-                  </button>
-                </template>
-                <div v-else class="text-center">
-                  <div class="text-xs text-gray-400">{{ formatDate(m.date) }}</div>
-                  <div class="text-xs text-gray-500">{{ formatTime(m.date) }}</div>
-                </div>
-              </template>
-              <template v-else-if="m.status === 'scheduled'">
-                <div class="text-center">
-                  <div class="text-xs text-gray-400">{{ formatDate(m.date) }}</div>
-                  <div class="text-xs text-gray-500">{{ formatTime(m.date) }}</div>
-                </div>
-              </template>
-              <template v-else>
-                <div class="flex items-center gap-3">
-                  <span class="text-xl font-bold text-gray-200 min-w-[1.5rem] text-right">{{ m.homeScore }}</span>
-                  <span class="text-gray-600 text-sm">-</span>
-                  <span class="text-xl font-bold text-gray-200 min-w-[1.5rem]">{{ m.awayScore }}</span>
-                </div>
-              </template>
-            </div>
-
-            <div class="flex items-center gap-3 w-[28%]">
-              <span v-if="m.awayTeam?.code" :class="'fi fi-' + m.awayTeam.code + ' text-lg leading-none'"></span>
-              <span class="text-sm text-gray-200 font-medium truncate">{{ m.awayTeam?.name ?? 'Pendiente' }}</span>
-            </div>
-          </div>
+            :match="m"
+            :prediction-value="predictions[m.id]"
+            :user-prediction="null"
+            :saving="saving.has(m.id)"
+            :show-prediction-input="!!auth.token"
+            @save="savePrediction"
+            @update-prediction="updatePrediction"
+          />
         </div>
       </div>
     </template>

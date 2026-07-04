@@ -2,37 +2,16 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { PHASES } from '@/constants'
+import PhaseTabs from '@/components/PhaseTabs.vue'
+import MatchCard from '@/components/MatchCard.vue'
+import type { MatchInfo, UserPrediction } from '@/components/MatchCard.vue'
+import { Avatar } from '@/components/ui'
+import { ArrowLeft } from '@lucide/vue'
 
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
-
-interface Team {
-  id: number
-  name: string
-  code: string | null
-}
-
-interface Match {
-  id: number
-  phase: string
-  round: string | null
-  date: string
-  status: string
-  homeTeam: Team | null
-  awayTeam: Team | null
-  homeScore: number | null
-  awayScore: number | null
-}
-
-interface UserPrediction {
-  id: number
-  matchId: number
-  predictedHomeScore: number
-  predictedAwayScore: number
-  points: number
-  match: Match
-}
 
 interface UserInfo {
   id: number
@@ -43,45 +22,21 @@ interface UserInfo {
 }
 
 const user = ref<UserInfo | null>(null)
-const predictions = ref<UserPrediction[]>([])
+const predictions = ref<(UserPrediction & { match: MatchInfo })[]>([])
 const loading = ref(true)
 const activePhase = ref('group')
-
-const phases = [
-  { key: 'group', label: 'Fase de Grupos' },
-  { key: 'round_of_32', label: '32avos' },
-  { key: 'round_of_16', label: 'Octavos' },
-  { key: 'quarter_final', label: 'Cuartos' },
-  { key: 'semi_final', label: 'Semis' },
-  { key: 'third_place', label: '3er Puesto' },
-  { key: 'final', label: 'Final' },
-]
 
 const filtered = computed(() => predictions.value.filter((p) => p.match.phase === activePhase.value))
 
 const grouped = computed(() => {
-  const groups: Record<string, UserPrediction[]> = {}
+  const groups: Record<string, (UserPrediction & { match: MatchInfo })[]> = {}
   for (const p of filtered.value) {
-    if (p.match.status === 'scheduled') {
-      const key = 'upcoming'
-      if (!groups[key]) groups[key] = []
-      groups[key].push(p)
-    } else {
-      const key = p.match.round || 'resultados'
-      if (!groups[key]) groups[key] = []
-      groups[key].push(p)
-    }
+    const key = p.match.status === 'scheduled' ? 'upcoming' : (p.match.round || 'resultados')
+    if (!groups[key]) groups[key] = []
+    groups[key].push(p)
   }
   return groups
 })
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-}
-
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
-}
 
 onMounted(async () => {
   if (!auth.token) { router.push('/login'); return }
@@ -97,92 +52,52 @@ onMounted(async () => {
   }
   loading.value = false
 })
+
+function displayName(u: UserInfo) {
+  return u.firstName ? `${u.firstName} ${u.lastName ?? ''}`.trim() : u.username
+}
 </script>
 
 <template>
-  <div>
-    <div v-if="user" class="flex items-center gap-3 mb-6">
-      <RouterLink to="/standings" class="text-sm text-gray-400 hover:text-gold transition">← Posiciones</RouterLink>
-      <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-sm font-bold text-gold">
-        {{ (user.firstName || user.username).charAt(0).toUpperCase() }}
-      </div>
+  <div class="animate-fade-in">
+    <div v-if="user" class="flex items-center gap-4 mb-6">
+      <RouterLink to="/standings" class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition p-1.5 rounded-lg hover:bg-accent">
+        <ArrowLeft class="w-4 h-4" />
+      </RouterLink>
+      <Avatar :name="user.firstName || user.username" size="lg" />
       <div>
-        <h1 class="text-xl font-bold text-gold">{{ user.firstName ? `${user.firstName} ${user.lastName ?? ''}` : user.username }}</h1>
-        <p class="text-xs text-gray-500">@{{ user.username }} · {{ user.pointsEarned }} pts</p>
+        <h1 class="text-xl font-bold text-foreground">{{ displayName(user) }}</h1>
+        <p class="text-sm text-muted-foreground">@{{ user.username }} · {{ user.pointsEarned }} pts</p>
       </div>
     </div>
 
-    <div class="flex flex-wrap gap-2 mb-8">
-      <button
-        v-for="p in phases"
-        :key="p.key"
-        @click="activePhase = p.key"
-        :class="activePhase === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-pitch-light text-gray-400 hover:text-gold border border-pitch-lighter'"
-        class="px-4 py-2 rounded-lg text-sm transition cursor-pointer"
-      >
-        {{ p.label }}
-      </button>
+    <div class="mb-6">
+      <PhaseTabs :phases="PHASES" :active="activePhase" @select="activePhase = $event" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-600">Cargando...</div>
+    <div v-if="loading" class="space-y-3">
+      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-muted animate-pulse" />
+    </div>
 
     <template v-else>
-      <div v-if="Object.keys(grouped).length === 0" class="text-center py-12 text-gray-600">
+      <div v-if="Object.keys(grouped).length === 0" class="text-center py-16 text-muted-foreground">
         Sin pronósticos en esta fase
       </div>
 
       <div v-for="(groupPredictions, groupKey) in grouped" :key="groupKey" class="mb-8">
-        <h2 v-if="groupKey === 'upcoming'" class="text-sm font-medium text-gold-light mb-3 uppercase tracking-wider">Próximos</h2>
-        <h2 v-else class="text-sm font-medium text-gold-light mb-3 uppercase tracking-wider">{{ groupKey }}</h2>
-
+        <h2 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+          <span class="w-1 h-4 rounded-full bg-gold" />
+          {{ groupKey === 'upcoming' ? 'Próximos' : groupKey }}
+        </h2>
         <div class="grid gap-3">
-          <div
+          <MatchCard
             v-for="p in groupPredictions"
             :key="p.id"
-            class="bg-pitch-light border border-pitch-lighter rounded-xl px-5 py-4 flex items-center justify-between"
-          >
-            <div class="flex items-center gap-3 w-[25%] justify-end">
-              <span class="text-sm text-gray-200 font-medium truncate">{{ p.match.homeTeam?.name ?? 'Pendiente' }}</span>
-              <span v-if="p.match.homeTeam?.code" :class="'fi fi-' + p.match.homeTeam.code + ' text-lg leading-none'"></span>
-            </div>
-
-            <div class="flex items-center gap-3 w-[40%] justify-center">
-              <!-- Scheduled -->
-              <template v-if="p.match.status === 'scheduled'">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-bold text-gold">{{ p.predictedHomeScore }}</span>
-                  <span class="text-gray-600 text-xs">-</span>
-                  <span class="text-sm font-bold text-gold">{{ p.predictedAwayScore }}</span>
-                </div>
-                <div class="ml-2 text-xs text-gray-500">{{ formatDate(p.match.date) }} {{ formatTime(p.match.date) }}</div>
-              </template>
-
-              <!-- Finished -->
-              <template v-else>
-                <div class="flex items-center gap-3">
-                  <div class="text-center">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xl font-bold text-gray-200 min-w-[1.5rem] text-right">{{ p.match.homeScore }}</span>
-                      <span class="text-gray-600 text-sm">-</span>
-                      <span class="text-xl font-bold text-gray-200 min-w-[1.5rem]">{{ p.match.awayScore }}</span>
-                    </div>
-                  </div>
-                  <div class="border-l border-pitch-lighter pl-3 ml-1">
-                    <div class="text-[10px] text-gray-500 uppercase">Pronosticó</div>
-                    <div class="text-sm font-bold mt-0.5" :class="p.points > 0 ? 'text-grass' : 'text-red-400'">
-                      {{ p.predictedHomeScore }} - {{ p.predictedAwayScore }}
-                      <span class="ml-1.5 text-xs">({{ p.points }} pts)</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </div>
-
-            <div class="flex items-center gap-3 w-[25%]">
-              <span v-if="p.match.awayTeam?.code" :class="'fi fi-' + p.match.awayTeam.code + ' text-lg leading-none'"></span>
-              <span class="text-sm text-gray-200 font-medium truncate">{{ p.match.awayTeam?.name ?? 'Pendiente' }}</span>
-            </div>
-          </div>
+            :match="p.match"
+            :user-prediction="p"
+            :show-prediction-input="false"
+            prediction-label="Pronosticó"
+          />
         </div>
       </div>
     </template>
