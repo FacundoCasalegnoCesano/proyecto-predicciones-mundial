@@ -46,6 +46,81 @@ function calculatePoints(predictedHome: number, predictedAway: number, actualHom
   return 0
 }
 
+export async function calculatePointsForMatch(matchId: number) {
+  const match = await prisma.match.findUnique({ where: { id: matchId } })
+  if (!match || match.status !== 'FT' || match.homeScore === null || match.awayScore === null) return 0
+
+  const predictions = await prisma.prediction.findMany({ where: { matchId } })
+  let updated = 0
+
+  for (const pred of predictions) {
+    const newPoints = calculatePoints(pred.predictedHomeScore, pred.predictedAwayScore, match.homeScore, match.awayScore)
+    const oldPoints = pred.points
+
+    if (newPoints !== oldPoints) {
+      await prisma.prediction.update({
+        where: { id: pred.id },
+        data: { points: newPoints },
+      })
+
+      const diff = newPoints - oldPoints
+      await prisma.user.update({
+        where: { id: pred.userId },
+        data: { pointsEarned: { increment: diff } },
+      })
+
+      await _updateUserStats(pred.userId)
+      updated++
+    }
+  }
+
+  return updated
+}
+
+async function _updateUserStats(userId: number) {
+  const predictions = await prisma.prediction.findMany({
+    where: { userId },
+    include: { match: true },
+    orderBy: { match: { date: 'asc' } },
+  })
+
+  const total = predictions.length
+  let exactas = 0
+  let correctas = 0
+  let currentStreak = 0
+  let maxStreak = 0
+
+  for (const p of predictions) {
+    if (p.points === 6) {
+      exactas++
+      correctas++
+      currentStreak++
+    } else if (p.points === 3) {
+      correctas++
+      currentStreak++
+    } else {
+      if (currentStreak > maxStreak) maxStreak = currentStreak
+      currentStreak = 0
+    }
+  }
+
+  if (currentStreak > maxStreak) maxStreak = currentStreak
+
+  const avg = total > 0 ? Math.round((predictions.reduce((sum, p) => sum + p.points, 0) / total) * 100) / 100 : 0
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      totalPredictions: total,
+      exactPredictions: exactas,
+      correctWinnerPredictions: correctas,
+      currentStreak,
+      maxStreak,
+      avgPoints: avg,
+    },
+  })
+}
+
 export async function calculateAllPoints() {
   const finished = await prisma.match.findMany({
     where: { status: 'FT', homeScore: { not: null }, awayScore: { not: null } },
@@ -54,27 +129,8 @@ export async function calculateAllPoints() {
   let totalUpdated = 0
 
   for (const match of finished) {
-    const predictions = await prisma.prediction.findMany({ where: { matchId: match.id } })
-
-    for (const pred of predictions) {
-      const newPoints = calculatePoints(pred.predictedHomeScore, pred.predictedAwayScore, match.homeScore!, match.awayScore!)
-      const oldPoints = pred.points
-
-      if (newPoints !== oldPoints) {
-        await prisma.prediction.update({
-          where: { id: pred.id },
-          data: { points: newPoints },
-        })
-
-        const diff = newPoints - oldPoints
-        await prisma.user.update({
-          where: { id: pred.userId },
-          data: { pointsEarned: { increment: diff } },
-        })
-
-        totalUpdated++
-      }
-    }
+    const updated = await calculatePointsForMatch(match.id)
+    totalUpdated += updated
   }
 
   return { updatedPredictions: totalUpdated }
@@ -154,4 +210,20 @@ export async function getAllPredictions() {
       awayScore: p.match.awayScore,
     },
   }))
+}
+
+export async function getUserStats(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      totalPredictions: true,
+      exactPredictions: true,
+      correctWinnerPredictions: true,
+      currentStreak: true,
+      maxStreak: true,
+      avgPoints: true,
+    },
+  })
+
+  return user ?? { totalPredictions: 0, exactPredictions: 0, correctWinnerPredictions: 0, currentStreak: 0, maxStreak: 0, avgPoints: 0 }
 }

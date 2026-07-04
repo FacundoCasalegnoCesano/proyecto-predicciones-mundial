@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { upsertPrediction, getMyPredictions, calculateAllPoints, getRanking, getAllPredictions, getUserPredictions } from './predictions.service.js'
+import { upsertPrediction, getMyPredictions, calculateAllPoints, getRanking, getAllPredictions, getUserPredictions, getUserStats } from './predictions.service.js'
 import { getIO } from '../../config/socket.js'
 
 export async function save(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -45,6 +45,15 @@ export async function ranking(req: Request, res: Response, next: NextFunction): 
 export async function allPredictions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await getAllPredictions()
+    res.json(result)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function stats(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await getUserStats(req.user!.userId)
     res.json(result)
   } catch (err) {
     next(err)
