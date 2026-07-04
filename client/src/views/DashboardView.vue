@@ -1,4 +1,26 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
+
+const stats = ref<any>(null)
+const loading = ref(true)
+
+async function fetchStats() {
+  try {
+    const res = await fetch('/api/predictions/stats', {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (res.ok) stats.value = await res.json()
+  } catch {
+    // silent
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchStats)
 </script>
 
 <template>
@@ -29,6 +51,36 @@
         <h2 class="text-lg font-semibold text-gold mb-2">Tabla de posiciones</h2>
         <p class="text-sm text-gray-500 leading-relaxed">Seguí el ranking de usuarios por puntos acumulados en los pronósticos.</p>
       </router-link>
+    </div>
+
+    <div v-if="stats && !loading" class="mt-8 bg-pitch-light border border-pitch-lighter rounded-xl p-6">
+      <h3 class="text-lg font-semibold text-gold mb-4">Mis estadísticas</h3>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white">{{ stats.totalPredictions }}</div>
+          <div class="text-xs text-gray-400 mt-1">Pronósticos</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-400">{{ stats.exactPredictions }}</div>
+          <div class="text-xs text-gray-400 mt-1">Exactos (6pts)</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-400">{{ stats.correctWinnerPredictions }}</div>
+          <div class="text-xs text-gray-400 mt-1">Ganador (3pts)</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white">{{ stats.currentStreak }}</div>
+          <div class="text-xs text-gray-400 mt-1">Racha actual</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gold">{{ stats.maxStreak }}</div>
+          <div class="text-xs text-gray-400 mt-1">Mejor racha</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-400">{{ stats.avgPoints }}</div>
+          <div class="text-xs text-gray-400 mt-1">Promedio pts</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
