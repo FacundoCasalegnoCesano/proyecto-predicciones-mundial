@@ -52,7 +52,7 @@ async function handleSubmit() {
           </div>
           <div class="space-y-2">
             <Label for="password">Contraseña</Label>
-            <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="6" />
+            <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="8" />
           </div>
           <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
             <UserPlus v-if="!loading" class="w-4 h-4" />

@@ -66,11 +66,11 @@ async function handleSubmit() {
           <form @submit.prevent="handleSubmit" class="space-y-4">
             <div class="space-y-2">
               <Label for="password">Nueva contraseña</Label>
-              <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="6" />
+              <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="8" />
             </div>
             <div class="space-y-2">
               <Label for="confirm">Confirmar contraseña</Label>
-              <Input id="confirm" v-model="confirmPassword" type="password" placeholder="••••••••" required minlength="6" />
+              <Input id="confirm" v-model="confirmPassword" type="password" placeholder="••••••••" required minlength="8" />
             </div>
             <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
               <Save class="w-4 h-4" /> {{ loading ? 'Guardando...' : 'Restablecer' }}
