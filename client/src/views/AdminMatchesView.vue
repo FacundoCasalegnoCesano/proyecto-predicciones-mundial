@@ -20,6 +20,7 @@ const teams = ref<Team[]>([])
 const matches = ref<Match[]>([])
 const loading = ref(true)
 const saving = ref<Set<number>>(new Set())
+const teamsAssigned = ref<Set<number>>(new Set())
 const activePhase = ref('group')
 const showForm = ref(false)
 
@@ -45,6 +46,7 @@ async function fetchData() {
   ])
   matches.value = await mRes.json()
   teams.value = await tRes.json()
+  teamsAssigned.value = new Set(matches.value.filter(m => m.homeTeam && m.awayTeam).map(m => m.id))
   loading.value = false
 }
 
@@ -72,9 +74,13 @@ async function assignTeams(m: Match) {
       awayTeamId: (m.awayTeam as Team).id,
     }),
   })
-  if (res.ok) toast.success('Equipos asignados')
+  if (res.ok) { toast.success('Equipos asignados'); teamsAssigned.value.add(m.id) }
   else toast.error('Error al asignar')
   saving.value.delete(m.id)
+}
+
+function editTeams(m: Match) {
+  teamsAssigned.value.delete(m.id)
 }
 
 async function createMatch() {
@@ -165,7 +171,7 @@ onMounted(fetchData)
         <Card v-for="m in filtered" :key="m.id" class="transition-[border-color,box-shadow] duration-200 hover:border-gold/20">
           <div class="px-4 sm:px-5 py-3 flex flex-col sm:flex-row items-center gap-3">
             <div class="flex items-center gap-3 w-full sm:w-[28%] justify-center sm:justify-end">
-              <template v-if="m.homeTeam">
+              <template v-if="teamsAssigned.has(m.id) && m.homeTeam">
                 <span class="text-sm text-foreground font-medium truncate">{{ m.homeTeam.name }}</span>
                 <span v-if="m.homeTeam.code" :class="'fi fi-' + m.homeTeam.code + ' text-lg leading-none'"></span>
               </template>
@@ -176,12 +182,13 @@ onMounted(fetchData)
             </div>
 
             <div class="flex items-center gap-2 w-full sm:w-[34%] justify-center">
-              <template v-if="!m.homeTeam || !m.awayTeam">
+              <template v-if="!teamsAssigned.has(m.id)">
                 <Button size="sm" variant="gold" @click="assignTeams(m)" :disabled="saving.has(m.id) || !m.homeTeam || !m.awayTeam">
                   {{ saving.has(m.id) ? '...' : 'Asignar equipos' }}
                 </Button>
               </template>
               <template v-else>
+                <Button size="sm" variant="outline" @click="editTeams(m)" class="mr-2 text-xs">Cambiar equipos</Button>
                 <div class="text-xs text-muted-foreground mr-2">{{ formatDate(m.date) }}</div>
                 <div class="flex items-center gap-2">
                   <input v-model.number="m.homeScore" type="number" min="0" max="20" class="w-12 text-center h-9 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -196,7 +203,7 @@ onMounted(fetchData)
             </div>
 
             <div class="flex items-center gap-3 w-full sm:w-[28%] justify-center sm:justify-start">
-              <template v-if="m.awayTeam">
+              <template v-if="teamsAssigned.has(m.id) && m.awayTeam">
                 <span v-if="m.awayTeam.code" :class="'fi fi-' + m.awayTeam.code + ' text-lg leading-none'"></span>
                 <span class="text-sm text-foreground font-medium truncate">{{ m.awayTeam.name }}</span>
               </template>
