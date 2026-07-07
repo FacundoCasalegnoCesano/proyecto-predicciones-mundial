@@ -6,8 +6,8 @@ import { PHASES } from '@/constants'
 import PhaseTabs from '@/components/PhaseTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import type { MatchInfo, UserPrediction } from '@/components/MatchCard.vue'
-import { Avatar } from '@/components/ui'
 import { ArrowLeft } from '@lucide/vue'
+import { Avatar, Skeleton, EmptyState } from '@/components/ui'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -76,17 +76,16 @@ function displayName(u: UserInfo) {
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-muted animate-pulse" />
+      <Skeleton v-for="i in 5" :key="i" class="h-[72px] rounded-xl" />
     </div>
 
     <template v-else>
-      <div v-if="Object.keys(grouped).length === 0" class="text-center py-16 text-muted-foreground">
-        Sin pronósticos en esta fase
+      <div v-if="Object.keys(grouped).length === 0">
+        <EmptyState title="Sin pronósticos en esta fase" description="Este usuario no ha hecho pronósticos para esta fase" />
       </div>
 
       <div v-for="(groupPredictions, groupKey) in grouped" :key="groupKey" class="mb-8">
-        <h2 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
-          <span class="w-1 h-4 rounded-full bg-gold" />
+        <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2 after:flex-1 after:h-px after:bg-border">
           {{ groupKey === 'upcoming' ? 'Próximos' : groupKey }}
         </h2>
         <div class="grid gap-3">

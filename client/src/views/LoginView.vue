@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { Trophy, ArrowRight, Eye, EyeOff, LogIn } from '@lucide/vue'
+import { Trophy, Eye, EyeOff, LogIn, AlertTriangle } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const auth = useAuthStore()
@@ -41,7 +41,7 @@ async function handleSubmit() {
 
         <Transition name="shake">
           <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5 flex items-center gap-2">
-            <span class="i-lucide-alert-circle w-4 h-4 shrink-0" />
+            <AlertTriangle class="w-4 h-4 shrink-0" />
             {{ error }}
           </div>
         </Transition>
@@ -58,8 +58,8 @@ async function handleSubmit() {
               <RouterLink to="/forgot-password" class="text-xs text-gold hover:text-gold-light transition">¿Olvidaste?</RouterLink>
             </div>
             <div class="relative">
-              <Input id="password" v-model="password" :type="showPw ? 'text' : 'password'" placeholder="••••••••" required />
-              <button type="button" @click="showPw = !showPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
+              <Input id="password" v-model="password" :type="showPw ? 'text' : 'password'" placeholder="••••••••" required class="pr-10" />
+              <button type="button" @click="showPw = !showPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5" tabindex="-1">
                 <Eye v-if="!showPw" class="w-4 h-4" />
                 <EyeOff v-else class="w-4 h-4" />
               </button>
@@ -67,9 +67,8 @@ async function handleSubmit() {
           </div>
 
           <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
-            <LogIn v-if="!loading" class="w-4 h-4" />
+            <LogIn class="w-4 h-4" />
             {{ loading ? 'Ingresando...' : 'Ingresar' }}
-            <ArrowRight v-if="!loading" class="w-4 h-4" />
           </Button>
         </form>
 
@@ -81,3 +80,16 @@ async function handleSubmit() {
     </Card>
   </div>
 </template>
+
+<style scoped>
+.shake-enter-active {
+  animation: shake 0.3s ease-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+</style>

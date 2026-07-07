@@ -12,8 +12,8 @@ const router = createRouter({
 
     { path: '/dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: { auth: true } },
     { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue'), meta: { auth: true } },
-    { path: '/matches', name: 'matches', component: () => import('../views/MatchesView.vue') },
-    { path: '/predictions', name: 'predictions', component: () => import('../views/PredictionsView.vue'), meta: { auth: true } },
+    { path: '/matches', redirect: '/predictions' },
+    { path: '/predictions', name: 'predictions', component: () => import('../views/PredictionsView.vue') },
     { path: '/standings', name: 'standings', component: () => import('../views/RankingView.vue') },
     {
       path: '/admin',

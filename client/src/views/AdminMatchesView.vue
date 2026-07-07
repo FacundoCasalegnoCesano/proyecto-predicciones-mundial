@@ -188,14 +188,13 @@ onMounted(fetchData)
                 </Button>
               </template>
               <template v-else>
-                <Button size="sm" variant="outline" @click="editTeams(m)" class="mr-2 text-xs">Cambiar equipos</Button>
-                <div class="text-xs text-muted-foreground mr-2">{{ formatDate(m.date) }}</div>
+                <div class="text-xs text-muted-foreground mr-2 whitespace-nowrap">{{ formatDate(m.date) }}</div>
                 <div class="flex items-center gap-2">
                   <input v-model.number="m.homeScore" type="number" min="0" max="20" class="w-12 text-center h-9 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                   <span class="text-muted-foreground">-</span>
                   <input v-model.number="m.awayScore" type="number" min="0" max="20" class="w-12 text-center h-9 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
-                <Button size="sm" variant="gold" @click="saveScore(m)" :disabled="saving.has(m.id) || m.homeScore === null || m.awayScore === null">
+                <Button size="sm" variant="gold" @click="saveScore(m)" :disabled="saving.has(m.id) || m.homeScore === null || m.awayScore === null" class="ml-2">
                   <Save v-if="!saving.has(m.id)" class="w-3 h-3" />
                   {{ saving.has(m.id) ? '...' : 'Guardar' }}
                 </Button>
@@ -206,6 +205,7 @@ onMounted(fetchData)
               <template v-if="teamsAssigned.has(m.id) && m.awayTeam">
                 <span v-if="m.awayTeam.code" :class="'fi fi-' + m.awayTeam.code + ' text-lg leading-none'"></span>
                 <span class="text-sm text-foreground font-medium truncate">{{ m.awayTeam.name }}</span>
+                <button @click="editTeams(m)" class="text-xs text-muted-foreground hover:text-foreground underline ml-1 shrink-0">Cambiar</button>
               </template>
               <select v-else v-model="m.awayTeam" class="h-9 rounded-lg border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring min-w-[150px]">
                 <option :value="null" disabled>Visitante...</option>

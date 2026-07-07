@@ -7,7 +7,7 @@ import { PHASES } from '@/constants'
 import PhaseTabs from '@/components/PhaseTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import type { MatchInfo, UserPrediction } from '@/components/MatchCard.vue'
-import { ChartLine } from '@lucide/vue'
+import { Skeleton, EmptyState } from '@/components/ui'
 
 const auth = useAuthStore()
 
@@ -109,8 +109,8 @@ onUnmounted(() => {
 <template>
   <div class="animate-fade-in">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-foreground">Mis Pronósticos</h1>
-      <p class="text-sm text-muted-foreground mt-1">Tus predicciones y puntuación</p>
+      <h1 class="text-2xl font-bold text-foreground">{{ auth.token ? 'Mis Pronósticos' : 'Partidos' }}</h1>
+      <p class="text-sm text-muted-foreground mt-1">{{ auth.token ? 'Tus predicciones y puntuación' : 'Resultados y próximos encuentros' }}</p>
     </div>
 
     <div class="mb-6">
@@ -118,18 +118,16 @@ onUnmounted(() => {
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 4" :key="i" class="h-16 rounded-xl bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%] animate-shimmer" />
+      <Skeleton v-for="i in 5" :key="i" class="h-[72px] rounded-xl" />
     </div>
 
     <template v-else>
-      <div v-if="Object.keys(grouped).length === 0" class="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
-        <ChartLine class="w-8 h-8 opacity-50" />
-        <p>No hay partidos en esta fase</p>
+      <div v-if="Object.keys(grouped).length === 0">
+        <EmptyState title="No hay partidos en esta fase" description="No hay partidos programados para esta fase del torneo" />
       </div>
 
       <div v-for="(groupMatches, groupKey) in grouped" :key="groupKey" class="mb-8">
-        <h2 class="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
-          <span class="w-1 h-4 rounded-full bg-gold" />
+        <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2 after:flex-1 after:h-px after:bg-border">
           {{ groupKey === 'upcoming' ? 'Próximos' : groupKey }}
         </h2>
 
@@ -138,10 +136,10 @@ onUnmounted(() => {
             v-for="m in groupMatches"
             :key="m.id"
             :match="m"
-            :prediction-value="m.status === 'scheduled' ? predInputs[m.id] : undefined"
-            :user-prediction="prediction(m.id) || null"
+            :prediction-value="m.status === 'scheduled' && auth.token ? predInputs[m.id] : undefined"
+            :user-prediction="auth.token ? (prediction(m.id) || null) : null"
             :saving="saving.has(m.id)"
-            :show-prediction-input="m.status === 'scheduled' && !!m.homeTeam && !!m.awayTeam"
+            :show-prediction-input="m.status === 'scheduled' && !!m.homeTeam && !!m.awayTeam && !!auth.token"
             @save="savePrediction"
             @update-prediction="updatePrediction"
           />

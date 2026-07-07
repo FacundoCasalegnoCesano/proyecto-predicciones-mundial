@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { Search, Shield, Swords, ChartLine } from '@lucide/vue'
-import { Button, Card, CardContent, Badge, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
+import { Button, Card, CardContent, Badge, Input, Skeleton, EmptyState, Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -38,6 +38,10 @@ async function toggleRole(userId: number, currentRole: string) {
 }
 
 onMounted(fetchUsers)
+
+watch(search, () => {
+  fetchUsers()
+})
 </script>
 
 <template>
@@ -61,18 +65,19 @@ onMounted(fetchUsers)
       <div class="border-b border-border px-4 sm:px-6 py-3 flex items-center gap-3">
         <div class="relative flex-1 max-w-xs">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Input
             v-model="search"
-            @input="fetchUsers"
             placeholder="Buscar usuario..."
-            class="w-full h-9 rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            class="!pl-9 !h-9"
           />
         </div>
       </div>
       <CardContent class="p-0">
-        <div v-if="loading" class="p-8 text-center text-muted-foreground animate-pulse">Cargando usuarios...</div>
+        <div v-if="loading" class="space-y-2 p-4">
+          <Skeleton v-for="i in 5" :key="i" class="h-12 rounded-lg" />
+        </div>
 
-        <Table v-else>
+        <Table v-else-if="users.length > 0">
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
@@ -103,11 +108,11 @@ onMounted(fetchUsers)
                 </Button>
               </TableCell>
             </TableRow>
-            <TableRow v-if="users.length === 0">
-              <TableCell colspan="6" class="text-center py-8 text-muted-foreground">No hay usuarios</TableCell>
-            </TableRow>
           </TableBody>
         </Table>
+        <div v-else-if="!loading" class="py-8">
+          <EmptyState title="No hay usuarios" description="No se encontraron usuarios con ese criterio de búsqueda" />
+        </div>
       </CardContent>
     </Card>
   </div>

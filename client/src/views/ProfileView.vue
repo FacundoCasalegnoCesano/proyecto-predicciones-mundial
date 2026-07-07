@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
-import { User, Save, KeyRound, UserCircle } from '@lucide/vue'
+import { Save, KeyRound, UserCircle } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label, Avatar } from '@/components/ui'
 
 const auth = useAuthStore()
@@ -31,7 +31,7 @@ async function saveProfile() {
   profileLoading.value = true
   try {
     const res = await fetch('/api/auth/profile', {
-      method: 'PUT',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
       body: JSON.stringify({ firstName: firstName.value, lastName: lastName.value }),
     })
@@ -45,8 +45,8 @@ async function changePassword() {
   if (!currentPassword.value || !newPassword.value) return
   passwordLoading.value = true
   try {
-    const res = await fetch('/api/auth/change-password', {
-      method: 'PUT',
+    const res = await fetch('/api/auth/password', {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
       body: JSON.stringify({ currentPassword: currentPassword.value, newPassword: newPassword.value }),
     })

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { UserPlus, ArrowRight, Trophy } from '@lucide/vue'
+import { UserPlus, Trophy, AlertTriangle } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const auth = useAuthStore()
@@ -39,7 +39,12 @@ async function handleSubmit() {
           <p class="text-sm text-muted-foreground">Registrate para empezar a pronosticar</p>
         </div>
 
-        <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5">{{ error }}</div>
+        <Transition name="shake">
+          <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5 flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4 shrink-0" />
+            {{ error }}
+          </div>
+        </Transition>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div class="space-y-2">
@@ -55,9 +60,8 @@ async function handleSubmit() {
             <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="8" />
           </div>
           <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
-            <UserPlus v-if="!loading" class="w-4 h-4" />
+            <UserPlus class="w-4 h-4" />
             {{ loading ? 'Registrando...' : 'Registrarse' }}
-            <ArrowRight v-if="!loading" class="w-4 h-4" />
           </Button>
         </form>
 
@@ -69,3 +73,16 @@ async function handleSubmit() {
     </Card>
   </div>
 </template>
+
+<style scoped>
+.shake-enter-active {
+  animation: shake 0.3s ease-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+</style>
