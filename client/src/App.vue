@@ -56,7 +56,7 @@ function isActive(to: string) {
 
 <template>
   <div class="min-h-screen bg-background">
-    <Toaster position="bottom-right" rich-colors closeButton theme="dark" />
+    <Toaster position="bottom-right" closeButton theme="dark" />
     <header class="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-lg bg-card/80">
       <nav class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-2">
         <RouterLink to="/" class="font-semibold text-sm sm:text-base tracking-wide text-gold hover:text-gold-light transition shrink-0 flex items-center gap-2">
@@ -175,5 +175,24 @@ function isActive(to: string) {
 .mobile-menu-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+</style>
+
+<style>
+.sonner-toast {
+  --normal-bg: #141d2e !important;
+  --normal-border: #1c2a42 !important;
+  --normal-text: #e2e8f0 !important;
+  --success-bg: #1a8a3f !important;
+  --success-border: #22c55e !important;
+  --success-text: #bbf7d0 !important;
+  --error-bg: #7f1d1d !important;
+  --error-border: #f87171 !important;
+  --error-text: #fca5a5 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2) !important;
+}
+[data-sonner-toaster] {
+  --font: 'Inter', system-ui, -apple-system, sans-serif !important;
 }
 </style>
