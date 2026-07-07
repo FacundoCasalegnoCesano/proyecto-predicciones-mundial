@@ -23,7 +23,8 @@ export function errorHandler(
 
   const zodError = err as ZodError
   if (zodError.issues) {
-    res.status(400).json({ error: 'Validation error', details: zodError.issues })
+    const messages = zodError.issues.map(i => i.message)
+    res.status(400).json({ error: messages.join('. ') })
     return
   }
 
