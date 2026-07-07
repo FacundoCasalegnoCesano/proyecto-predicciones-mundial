@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { UserPlus, Trophy, AlertTriangle } from '@lucide/vue'
+import { UserPlus, Trophy, AlertTriangle, Check, X } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const auth = useAuthStore()
@@ -12,6 +12,16 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+
+const rules = computed(() => [
+  { label: 'Mínimo 8 caracteres', done: password.value.length >= 8 },
+  { label: 'Una mayúscula (A-Z)', done: /[A-Z]/.test(password.value) },
+  { label: 'Una minúscula (a-z)', done: /[a-z]/.test(password.value) },
+  { label: 'Un número (0-9)', done: /[0-9]/.test(password.value) },
+  { label: 'Un carácter especial', done: /[^A-Za-z0-9]/.test(password.value) },
+])
+
+const allValid = computed(() => rules.value.every(r => r.done))
 
 async function handleSubmit() {
   error.value = ''
@@ -58,8 +68,14 @@ async function handleSubmit() {
           <div class="space-y-2">
             <Label for="password">Contraseña</Label>
             <Input id="password" v-model="password" type="password" placeholder="••••••••" required minlength="8" />
+            <div v-if="password.length > 0" class="space-y-1 mt-2">
+              <div v-for="r in rules" :key="r.label" class="flex items-center gap-1.5 text-xs" :class="r.done ? 'text-success-foreground' : 'text-destructive-foreground/70'">
+                <component :is="r.done ? Check : X" class="w-3.5 h-3.5 shrink-0" :class="r.done ? 'text-success' : 'text-destructive/60'" />
+                {{ r.label }}
+              </div>
+            </div>
           </div>
-          <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading">
+          <Button type="submit" variant="gold" size="lg" class="w-full" :disabled="loading || !allValid">
             <UserPlus class="w-4 h-4" />
             {{ loading ? 'Registrando...' : 'Registrarse' }}
           </Button>
