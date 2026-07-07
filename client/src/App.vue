@@ -56,7 +56,7 @@ function isActive(to: string) {
 
 <template>
   <div class="min-h-screen bg-background">
-    <Toaster position="bottom-right" rich-colors closeButton />
+    <Toaster position="bottom-right" rich-colors closeButton theme="dark" />
     <header class="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-lg bg-card/80">
       <nav class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-2">
         <RouterLink to="/" class="font-semibold text-sm sm:text-base tracking-wide text-gold hover:text-gold-light transition shrink-0 flex items-center gap-2">
