@@ -103,7 +103,6 @@ async function _updateUserStats(userId: number) {
   for (const p of predictions) {
     if (p.points === 6) {
       exactas++
-      correctas++
       currentStreak++
     } else if (p.points === 3) {
       correctas++
