@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 import { Plus, Save, RefreshCw, Check, Swords } from '@lucide/vue'
 import { Button, Card, CardContent, Badge } from '@/components/ui'
 import { connectSocket } from '@/services/socket'
 
+const router = useRouter()
 const auth = useAuthStore()
 
 interface Team { id: number; name: string; code: string | null }
@@ -110,7 +112,7 @@ onMounted(fetchData)
         <h1 class="text-2xl font-bold text-foreground">Admin Partidos</h1>
         <p class="text-sm text-muted-foreground mt-1">Gestioná los partidos del Mundial</p>
       </div>
-      <RouterLink to="/admin"><Button variant="outline" size="sm"><Swords class="w-4 h-4" /> Usuarios</Button></RouterLink>
+      <Button variant="outline" size="sm" @click="router.push('/admin')"><Swords class="w-4 h-4" /> Usuarios</Button>
     </div>
 
     <div class="mb-6 flex flex-wrap gap-2">

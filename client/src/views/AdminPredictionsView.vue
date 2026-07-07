@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 import { Search, RefreshCw, Swords } from '@lucide/vue'
 import { Button, Card, Badge, Skeleton, EmptyState, Input, Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui'
 
+const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(true)
 const predictions = ref<any[]>([])
@@ -66,7 +68,7 @@ onMounted(fetchPredictions)
         <p class="text-sm text-muted-foreground mt-1">Revisá todos los pronósticos del sistema</p>
       </div>
       <div class="flex items-center gap-2">
-        <RouterLink to="/admin"><Button variant="outline" size="sm"><Swords class="w-4 h-4" /> Usuarios</Button></RouterLink>
+        <Button variant="outline" size="sm" @click="router.push('/admin')"><Swords class="w-4 h-4" /> Usuarios</Button>
         <Button variant="gold" size="sm" @click="recalculate"><RefreshCw class="w-4 h-4" /> Recalcular puntos</Button>
       </div>
     </div>
