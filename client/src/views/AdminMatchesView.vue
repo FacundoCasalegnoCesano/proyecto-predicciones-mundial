@@ -41,7 +41,7 @@ async function fetchData() {
   loading.value = true
   const [mRes, tRes] = await Promise.all([
     fetch('/api/matches'),
-    fetch('/api/matches/teams'),
+    fetch('/api/teams'),
   ])
   matches.value = await mRes.json()
   teams.value = await tRes.json()
