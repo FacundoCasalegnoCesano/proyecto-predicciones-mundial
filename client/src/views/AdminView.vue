@@ -52,12 +52,12 @@ watch(search, () => {
         <p class="text-sm text-muted-foreground mt-1">Gestión de usuarios del sistema</p>
       </div>
       <div class="flex items-center gap-2">
-        <RouterLink to="/admin/predictions">
-          <Button variant="outline" size="sm"><ChartLine class="w-4 h-4" /> Pronósticos</Button>
-        </RouterLink>
-        <RouterLink to="/admin/matches">
-          <Button variant="outline" size="sm"><Swords class="w-4 h-4" /> Partidos</Button>
-        </RouterLink>
+        <Button variant="outline" size="sm" @click="router.push('/admin/predictions')">
+          <ChartLine class="w-4 h-4" /> Pronósticos
+        </Button>
+        <Button variant="outline" size="sm" @click="router.push('/admin/matches')">
+          <Swords class="w-4 h-4" /> Partidos
+        </Button>
       </div>
     </div>
 
