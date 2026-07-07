@@ -2,8 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
-import { Search, RefreshCw, ChartLine, Swords } from '@lucide/vue'
-import { Button, Card, Badge } from '@/components/ui'
+import { Search, RefreshCw, Swords } from '@lucide/vue'
+import { Button, Card, Badge, Skeleton, EmptyState, Input, Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui'
 
 const auth = useAuthStore()
 const loading = ref(true)
@@ -75,14 +75,14 @@ onMounted(fetchPredictions)
       <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div class="relative flex-1 max-w-xs w-full">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input v-model="search" placeholder="Buscar usuario..." class="w-full h-9 rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <Input v-model="search" placeholder="Buscar usuario..." class="!pl-9 !h-9" />
         </div>
         <div class="flex flex-wrap gap-1.5">
           <button
             v-for="p in PHASES" :key="p.key"
             @click="phaseFilter = p.key"
             :class="phaseFilter === p.key ? 'bg-gold text-pitch font-semibold' : 'bg-card text-muted-foreground hover:text-foreground border border-border'"
-            class="px-3 py-1.5 rounded-lg text-xs transition-[color,background-color,border-color] duration-200 cursor-pointer"
+            class="px-3 py-1.5 rounded-lg text-xs transition duration-200 cursor-pointer"
           >
             {{ p.label }}
           </button>
@@ -91,53 +91,54 @@ onMounted(fetchPredictions)
       </div>
     </Card>
 
-    <div v-if="loading" class="space-y-3">
-      <div v-for="i in 4" :key="i" class="h-12 rounded-xl bg-muted animate-pulse" />
+    <div v-if="loading" class="space-y-2">
+      <Skeleton v-for="i in 6" :key="i" class="h-12 rounded-lg" />
+    </div>
+
+    <div v-else-if="filtered.length === 0">
+      <EmptyState title="No hay pronósticos" description="Ningún usuario ha hecho pronósticos todavía" />
     </div>
 
     <Card v-else>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-border text-muted-foreground text-left">
-              <th class="py-3 px-4 font-medium">Usuario</th>
-              <th class="py-3 px-4 font-medium">Partido</th>
-              <th class="py-3 px-4 text-center font-medium">Pronóstico</th>
-              <th class="py-3 px-4 text-center font-medium">Resultado</th>
-              <th class="py-3 px-4 text-center font-medium">Pts</th>
-              <th class="py-3 px-4 text-center font-medium">Fase</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="p in filtered" :key="p.id" class="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-              <td class="py-3 px-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Usuario</TableHead>
+              <TableHead>Partido</TableHead>
+              <TableHead class="text-center">Pronóstico</TableHead>
+              <TableHead class="text-center">Resultado</TableHead>
+              <TableHead class="text-center">Pts</TableHead>
+              <TableHead class="text-center">Fase</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="p in filtered" :key="p.id" class="hover:bg-muted/30">
+              <TableCell>
                 <span class="text-foreground font-medium">{{ p.user.firstName ? `${p.user.firstName} ${p.user.lastName ?? ''}` : p.user.username }}</span>
                 <span class="text-muted-foreground text-xs ml-1">@{{ p.user.username }}</span>
-              </td>
-              <td class="py-3 px-4 text-foreground">
+              </TableCell>
+              <TableCell>
                 <span v-if="p.match?.homeTeam" class="text-foreground">{{ p.match.homeTeam.name }}</span>
                 <span v-else class="text-muted-foreground">TBD</span>
                 <span class="text-muted-foreground mx-1">vs</span>
                 <span v-if="p.match?.awayTeam" class="text-foreground">{{ p.match.awayTeam.name }}</span>
                 <span v-else class="text-muted-foreground">TBD</span>
-              </td>
-              <td class="py-3 px-4 text-center text-foreground tabular-nums">{{ p.predictedHomeScore }} - {{ p.predictedAwayScore }}</td>
-              <td class="py-3 px-4 text-center">
+              </TableCell>
+              <TableCell class="text-center tabular-nums">{{ p.predictedHomeScore }} - {{ p.predictedAwayScore }}</TableCell>
+              <TableCell class="text-center">
                 <template v-if="p.match?.status === 'FT'">
-                  <span class="text-foreground tabular-nums">{{ p.match.homeScore }} - {{ p.match.awayScore }}</span>
+                  <span class="tabular-nums">{{ p.match.homeScore }} - {{ p.match.awayScore }}</span>
                 </template>
                 <span v-else class="text-muted-foreground">-</span>
-              </td>
-              <td class="py-3 px-4 text-center">
+              </TableCell>
+              <TableCell class="text-center">
                 <Badge :variant="p.points > 0 ? 'grass' : 'outline'">{{ p.points }}</Badge>
-              </td>
-              <td class="py-3 px-4 text-center text-muted-foreground text-xs">{{ phaseLabel(p.match?.phase) }}</td>
-            </tr>
-            <tr v-if="filtered.length === 0">
-              <td colspan="6" class="text-center py-12 text-muted-foreground">No hay pronósticos</td>
-            </tr>
-          </tbody>
-        </table>
+              </TableCell>
+              <TableCell class="text-center text-muted-foreground text-xs">{{ phaseLabel(p.match?.phase) }}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
     </Card>
   </div>

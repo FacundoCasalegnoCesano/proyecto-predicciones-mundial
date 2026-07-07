@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Mail, ArrowLeft, KeyRound, Send } from '@lucide/vue'
+import { Mail, ArrowLeft, KeyRound, Send, AlertTriangle } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const router = useRouter()
@@ -38,7 +38,12 @@ async function handleSubmit() {
           <p class="text-sm text-muted-foreground">Te enviamos un link para restablecerla</p>
         </div>
 
-        <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5">{{ error }}</div>
+        <Transition name="shake">
+          <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5 flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4 shrink-0" />
+            {{ error }}
+          </div>
+        </Transition>
 
         <template v-if="sent">
           <div class="text-center space-y-4 py-4 animate-scale-in">

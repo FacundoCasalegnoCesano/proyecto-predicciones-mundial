@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { connectSocket, disconnectSocket } from '@/services/socket'
 import { Trophy, Medal, Award, RefreshCw } from '@lucide/vue'
-import { Card, CardContent, Avatar, Badge } from '@/components/ui'
+import { Card, CardContent, Avatar, Badge, Skeleton, EmptyState } from '@/components/ui'
 
 interface RankingUser {
   rank: number
@@ -84,8 +84,8 @@ function rankBadge(rank: number) {
 
     <Card>
       <CardContent class="p-0">
-        <div v-if="loading" class="space-y-3 p-4">
-          <div v-for="i in 5" :key="i" class="h-14 rounded-xl bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%] animate-shimmer" />
+        <div v-if="loading" class="space-y-2 p-4">
+          <Skeleton v-for="i in 6" :key="i" class="h-[60px] rounded-lg" />
         </div>
 
         <template v-else>
@@ -118,8 +118,8 @@ function rankBadge(rank: number) {
             </div>
           </RouterLink>
 
-          <div v-if="users.length === 0" class="text-center py-12 text-muted-foreground">
-            No hay usuarios registrados
+          <div v-if="users.length === 0" class="py-12">
+            <EmptyState title="No hay usuarios" description="Todavía no hay participantes en el ranking" />
           </div>
         </template>
       </CardContent>

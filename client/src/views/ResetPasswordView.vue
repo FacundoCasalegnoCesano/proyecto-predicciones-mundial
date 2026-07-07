@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Lock, ShieldCheck, ArrowLeft, Save } from '@lucide/vue'
+import { Lock, ShieldCheck, ArrowLeft, Save, AlertTriangle } from '@lucide/vue'
 import { Button, Card, CardContent, Input, Label } from '@/components/ui'
 
 const route = useRoute()
@@ -48,7 +48,12 @@ async function handleSubmit() {
           <h1 class="text-2xl font-bold text-foreground">Nueva contraseña</h1>
         </div>
 
-        <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5">{{ error }}</div>
+        <Transition name="shake">
+          <div v-if="error" class="text-sm text-destructive-foreground bg-destructive/20 rounded-lg px-4 py-2.5 flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4 shrink-0" />
+            {{ error }}
+          </div>
+        </Transition>
 
         <template v-if="done">
           <div class="text-center space-y-4 py-4 animate-scale-in">
