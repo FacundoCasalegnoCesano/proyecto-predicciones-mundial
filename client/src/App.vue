@@ -34,8 +34,7 @@ const links = computed<NavLink[]>(() => [
 const visibleLinks = computed(() => links.value.filter(l => l.show()))
 
 onMounted(() => {
-  const socket = connectSocket()
-  socket.on('notification', () => {})
+  connectSocket()
 })
 
 onUnmounted(() => {
@@ -59,14 +58,14 @@ function isActive(to: string) {
     <Toaster position="bottom-right" closeButton theme="dark" />
     <header class="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-lg bg-card/80">
       <nav class="max-w-5xl mx-auto px-4 h-14 flex items-center gap-2">
-        <RouterLink to="/" class="font-semibold text-sm sm:text-base tracking-wide text-gold hover:text-gold-light transition shrink-0 flex items-center gap-2">
+        <RouterLink to="/" class="font-semibold text-sm sm:text-base tracking-wide text-gold hoverable:text-gold-light transition shrink-0 flex items-center gap-2">
           <Trophy class="w-5 h-5" />
           <span class="hidden sm:inline">Prode Mundial 2026</span>
         </RouterLink>
 
         <button
           @click="menuOpen = !menuOpen"
-          class="sm:hidden ml-auto text-muted-foreground hover:text-foreground cursor-pointer p-1.5 rounded-lg hover:bg-accent transition"
+          class="sm:hidden ml-auto text-muted-foreground hoverable:text-foreground cursor-pointer p-1.5 rounded-lg hoverable:bg-accent transition"
           aria-label="Menú de navegación"
           :aria-expanded="menuOpen"
           aria-controls="mobile-menu"
@@ -85,8 +84,8 @@ function isActive(to: string) {
                 'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition cursor-pointer',
                 isActive(l.to)
                   ? 'text-gold bg-gold/10'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-              )"
+                  : 'text-muted-foreground hoverable:text-foreground hoverable:bg-accent'
+                )"
             >
               <component :is="l.icon" v-if="l.icon" class="w-4 h-4" />
               {{ l.label }}
@@ -96,7 +95,7 @@ function isActive(to: string) {
             v-if="auth.token"
             href="#"
             @click.prevent="auth.logout(); router.push('/login')"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition cursor-pointer text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/15 ml-1"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition cursor-pointer text-muted-foreground hoverable:text-destructive-foreground hoverable:bg-destructive/15 ml-1"
           >
             <LogOut class="w-4 h-4" />
             <span class="hidden lg:inline">Salir</span>
@@ -123,18 +122,18 @@ function isActive(to: string) {
                   'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition',
                   isActive(l.to)
                     ? 'text-gold bg-gold/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                    : 'text-muted-foreground hoverable:text-foreground hoverable:bg-accent'
                 )"
-              >
-                <component :is="l.icon" v-if="l.icon" class="w-4 h-4" />
-                {{ l.label }}
-              </RouterLink>
+            >
+              <component :is="l.icon" v-if="l.icon" class="w-4 h-4" />
+              {{ l.label }}
+            </RouterLink>
             </template>
             <a
               v-if="auth.token"
               href="#"
               @click.prevent="auth.logout(); router.push('/login'); menuOpen = false"
-              class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/15"
+              class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition text-muted-foreground hoverable:text-destructive-foreground hoverable:bg-destructive/15"
             >
               <LogOut class="w-4 h-4" />
               Cerrar sesión
@@ -166,10 +165,9 @@ function isActive(to: string) {
   opacity: 0;
   transform: translateY(-4px);
 }
-
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {
-  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .mobile-menu-enter-from,
 .mobile-menu-leave-to {

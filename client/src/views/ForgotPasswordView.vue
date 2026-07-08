@@ -35,7 +35,7 @@ async function handleSubmit() {
             <KeyRound class="w-7 h-7 text-gold" />
           </div>
           <h1 class="text-2xl font-bold text-foreground">Recuperar contraseña</h1>
-          <p class="text-sm text-muted-foreground">Te enviamos un link para restablecerla</p>
+          <p class="text-sm text-muted-foreground">Ingresá tu email para recibir un link</p>
         </div>
 
         <Transition name="shake">

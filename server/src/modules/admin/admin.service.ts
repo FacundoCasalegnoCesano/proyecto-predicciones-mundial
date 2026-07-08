@@ -30,7 +30,11 @@ export async function listUsers(search?: string) {
   }))
 }
 
-export async function updateUserRole(userId: number, role: string) {
+export async function updateUserRole(userId: number, role: string, adminUserId: number) {
+  if (userId === adminUserId) {
+    throw new AppError(400, 'No puedes cambiar tu propio rol')
+  }
+
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) {
     throw new AppError(404, 'User not found')

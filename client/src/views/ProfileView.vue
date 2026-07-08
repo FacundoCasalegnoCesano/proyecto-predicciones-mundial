@@ -85,11 +85,11 @@ async function changePassword() {
         </div>
         <div class="space-y-2">
           <Label for="email">Email</Label>
-          <Input id="email" :model-value="email" type="email" disabled class="opacity-60" />
+          <Input id="email" v-model="email" type="email" disabled class="opacity-60" />
         </div>
         <div class="space-y-2">
           <Label for="username">Usuario</Label>
-          <Input id="username" :model-value="username" type="text" disabled class="opacity-60" />
+          <Input id="username" v-model="username" type="text" disabled class="opacity-60" />
         </div>
         <Button variant="gold" size="sm" :disabled="profileLoading" @click="saveProfile">
           <Save class="w-4 h-4" /> {{ profileLoading ? 'Guardando...' : 'Guardar cambios' }}

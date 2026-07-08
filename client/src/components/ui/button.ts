@@ -5,14 +5,14 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/85 shadow-sm',
-        gold: 'bg-gold text-pitch font-semibold hover:bg-gold-light shadow-sm active:shadow-glow-gold',
-        'gold-outline': 'border border-gold/30 text-gold hover:bg-gold/10 hover:border-gold/50',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/85',
-        outline: 'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/85',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+        default: 'bg-primary text-primary-foreground hoverable:bg-primary/85 shadow-sm',
+        gold: 'bg-gold text-pitch font-semibold hoverable:bg-gold-light shadow-sm active:shadow-glow-gold',
+        'gold-outline': 'border border-gold/30 text-gold hoverable:bg-gold/10 hoverable:border-gold/50',
+        destructive: 'bg-destructive text-destructive-foreground hoverable:bg-destructive/85',
+        outline: 'border border-input bg-transparent hoverable:bg-accent hoverable:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hoverable:bg-secondary/85',
+        ghost: 'hoverable:bg-accent hoverable:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hoverable:underline',
       },
       size: {
         default: 'h-11 px-4 py-2',

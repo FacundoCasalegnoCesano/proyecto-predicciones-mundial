@@ -75,9 +75,17 @@
     0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-gold) 0%, transparent); }
     50% { box-shadow: 0 0 14px 3px color-mix(in srgb, var(--color-gold) 12%, transparent); }
   }
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+  }
+}
+
+@custom-variant hoverable {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
   }
 }
 

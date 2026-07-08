@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import './config/env.js'
 import { prisma } from './config/prisma.js'
 import { createSocketServer } from './config/socket.js'
 

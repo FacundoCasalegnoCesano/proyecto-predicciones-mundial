@@ -6,7 +6,7 @@ export async function createNotification(userId: number, type: string, message: 
     data: { userId, type, message, data },
   })
 
-  getIO().emit('notification', notification)
+  getIO().to(`user:${userId}`).emit('notification', notification)
 
   return notification
 }

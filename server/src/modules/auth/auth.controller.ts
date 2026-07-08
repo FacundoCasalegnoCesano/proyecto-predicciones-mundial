@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.validation.js'
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, resetPasswordSchema, deleteAccountSchema } from './auth.validation.js'
 import { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount, forgotPassword, resetPassword } from './auth.service.js'
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -53,7 +53,8 @@ export async function changePasswordHandler(req: Request, res: Response, next: N
 
 export async function deleteAccountHandler(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await deleteAccount(req.user!.userId)
+    const { currentPassword } = deleteAccountSchema.parse(req.body)
+    await deleteAccount(req.user!.userId, currentPassword)
     res.json({ message: 'Account deleted' })
   } catch (err) {
     next(err)

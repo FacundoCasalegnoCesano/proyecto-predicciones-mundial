@@ -59,7 +59,7 @@ async function handleSubmit() {
             </div>
             <div class="relative">
               <Input id="password" v-model="password" :type="showPw ? 'text' : 'password'" placeholder="••••••••" required class="pr-10" />
-              <button type="button" @click="showPw = !showPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5" tabindex="-1">
+              <button type="button" @click="showPw = !showPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hoverable:text-foreground cursor-pointer p-2" tabindex="-1">
                 <Eye v-if="!showPw" class="w-4 h-4" />
                 <EyeOff v-else class="w-4 h-4" />
               </button>

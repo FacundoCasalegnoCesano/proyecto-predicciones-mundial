@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 import { Plus, Save, RefreshCw, Check, Swords } from '@lucide/vue'
-import { Button, Card, CardContent, Badge } from '@/components/ui'
+import { Button, Card, CardContent, Badge, Input } from '@/components/ui'
 import { connectSocket } from '@/services/socket'
 
 const router = useRouter()
@@ -141,7 +141,7 @@ onMounted(fetchData)
             <CardContent class="p-5 flex flex-wrap gap-4 items-end">
               <div>
                 <label class="block text-xs text-muted-foreground mb-1.5">Fecha y hora</label>
-                <input v-model="newMatch.date" type="datetime-local" class="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                <Input v-model="newMatch.date" type="datetime-local" />
               </div>
               <div>
                 <label class="block text-xs text-muted-foreground mb-1.5">Local</label>
@@ -223,7 +223,7 @@ onMounted(fetchData)
 
 <style scoped>
 .slide-enter-active, .slide-leave-active {
-  transition: all 0.2s ease-out;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .slide-enter-from, .slide-leave-to {
   opacity: 0;
