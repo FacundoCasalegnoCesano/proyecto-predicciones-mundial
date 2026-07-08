@@ -41,3 +41,7 @@ export const resetPasswordSchema = z.object({
   token: z.string(),
   password: passwordSchema,
 })
+
+export const deleteAccountSchema = z.object({
+  currentPassword: z.string(),
+})

@@ -5,6 +5,7 @@ import { computed } from 'vue'
 const props = defineProps<{
   class?: string
   modelValue?: string | number
+  type?: string
 }>()
 
 const emit = defineEmits<{
@@ -20,6 +21,7 @@ function onInput(e: Event) {
   <input
     :value="modelValue"
     @input="onInput"
+    :type="type ?? 'text'"
     :class="cn(
       'flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground',
       'placeholder:text-muted-foreground',

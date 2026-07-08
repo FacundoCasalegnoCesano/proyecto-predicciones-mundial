@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js'
 import { createNotification } from '../notifications/notifications.service.js'
+import { mapPredictionToDTO } from './mappers/prediction.mapper.js'
 
 export async function upsertPrediction(userId: number, matchId: number, homeScore: number, awayScore: number) {
   const match = await prisma.match.findUnique({
@@ -29,23 +30,7 @@ export async function getMyPredictions(userId: number) {
     orderBy: { match: { date: 'asc' } },
   })
 
-  return predictions.map((p) => ({
-    id: p.id,
-    matchId: p.matchId,
-    predictedHomeScore: p.predictedHomeScore,
-    predictedAwayScore: p.predictedAwayScore,
-    points: p.points,
-    match: {
-      id: p.match.id,
-      phase: p.match.phase,
-      date: p.match.date,
-      status: p.match.status,
-      homeTeam: p.match.homeTeam ? { id: p.match.homeTeam.id, name: p.match.homeTeam.name, code: p.match.homeTeam.code } : null,
-      awayTeam: p.match.awayTeam ? { id: p.match.awayTeam.id, name: p.match.awayTeam.name, code: p.match.awayTeam.code } : null,
-      homeScore: p.match.homeScore,
-      awayScore: p.match.awayScore,
-    },
-  }))
+  return predictions.map(mapPredictionToDTO)
 }
 
 function calculatePoints(predictedHome: number, predictedAway: number, actualHome: number, actualAway: number): number {
@@ -172,29 +157,14 @@ export async function getUserPredictions(userId: number) {
 
   return {
     user,
-    predictions: predictions.map((p) => ({
-      id: p.id,
-      matchId: p.matchId,
-      predictedHomeScore: p.predictedHomeScore,
-      predictedAwayScore: p.predictedAwayScore,
-      points: p.points,
-      match: {
-        id: p.match.id,
-        phase: p.match.phase,
-        round: p.match.round,
-        date: p.match.date,
-        status: p.match.status,
-        homeTeam: p.match.homeTeam ? { id: p.match.homeTeam.id, name: p.match.homeTeam.name, code: p.match.homeTeam.code } : null,
-        awayTeam: p.match.awayTeam ? { id: p.match.awayTeam.id, name: p.match.awayTeam.name, code: p.match.awayTeam.code } : null,
-        homeScore: p.match.homeScore,
-        awayScore: p.match.awayScore,
-      },
-    })),
+    predictions: predictions.map(mapPredictionToDTO),
   }
 }
 
-export async function getAllPredictions() {
+export async function getAllPredictions(skip = 0, take = 100) {
   const predictions = await prisma.prediction.findMany({
+    skip,
+    take,
     include: {
       user: { select: { id: true, username: true, firstName: true, lastName: true } },
       match: {
@@ -204,25 +174,14 @@ export async function getAllPredictions() {
     orderBy: [{ match: { date: 'desc' } }, { user: { username: 'asc' } }],
   })
 
-  return predictions.map((p) => ({
-    id: p.id,
-    userId: p.userId,
-    matchId: p.matchId,
-    predictedHomeScore: p.predictedHomeScore,
-    predictedAwayScore: p.predictedAwayScore,
-    points: p.points,
-    user: p.user,
-    match: {
-      id: p.match.id,
-      phase: p.match.phase,
-      date: p.match.date,
-      status: p.match.status,
-      homeTeam: p.match.homeTeam ? { id: p.match.homeTeam.id, name: p.match.homeTeam.name, code: p.match.homeTeam.code } : null,
-      awayTeam: p.match.awayTeam ? { id: p.match.awayTeam.id, name: p.match.awayTeam.name, code: p.match.awayTeam.code } : null,
-      homeScore: p.match.homeScore,
-      awayScore: p.match.awayScore,
-    },
-  }))
+  const total = await prisma.prediction.count()
+
+  return {
+    predictions: predictions.map(mapPredictionToDTO),
+    total,
+    skip,
+    take,
+  }
 }
 
 export async function getUserStats(userId: number) {

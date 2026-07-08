@@ -79,7 +79,7 @@ async function savePrediction(matchId: number) {
   saving.value.delete(matchId)
 }
 
-function updatePrediction(matchId: number, home: number, away: number) {
+function updatePrediction(matchId: number, home: number | undefined, away: number | undefined) {
   predInputs.value[matchId] = { home, away }
 }
 

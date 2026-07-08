@@ -39,7 +39,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   save: [matchId: number]
-  updatePrediction: [matchId: number, home: number, away: number]
+  updatePrediction: [matchId: number, home: number | undefined, away: number | undefined]
 }>()
 
 function formatDate(dateStr: string) {
@@ -51,11 +51,13 @@ function formatTime(dateStr: string) {
 }
 
 function onHomeInput(e: Event, matchId: number) {
-  emit('updatePrediction', matchId, Number((e.target as HTMLInputElement).value), props.predictionValue?.away ?? ('' as any))
+  const away = props.predictionValue?.away
+  emit('updatePrediction', matchId, Number((e.target as HTMLInputElement).value), away)
 }
 
 function onAwayInput(e: Event, matchId: number) {
-  emit('updatePrediction', matchId, props.predictionValue?.home ?? ('' as any), Number((e.target as HTMLInputElement).value))
+  const home = props.predictionValue?.home
+  emit('updatePrediction', matchId, home, Number((e.target as HTMLInputElement).value))
 }
 </script>
 

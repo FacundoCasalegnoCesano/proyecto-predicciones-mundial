@@ -1,11 +1,9 @@
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { AppError } from './errorHandler.js'
+import { env } from '../config/env.js'
 
-const secret: string = process.env['JWT_SECRET'] ?? 'fallback-dev-only-change-me'
-if (!process.env['JWT_SECRET']) {
-  console.warn('WARNING: JWT_SECRET not set, using insecure fallback. Set it in production.')
-}
+const secret = env.JWT_SECRET
 
 export interface JwtPayload {
   userId: number
@@ -27,7 +25,7 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
   }
 
   const token = header.slice(7)
-  const payload = jwt.verify(token, secret) as unknown as JwtPayload
+  const payload = jwt.verify(token, secret, { algorithms: ['HS256'] }) as unknown as JwtPayload
   req.user = payload
   next()
 }

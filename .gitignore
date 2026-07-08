@@ -6,3 +6,5 @@ dist/
 docs/
 skills-lock.json
 *.log
+AGENTS.md
+PRODUCT.md

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
+import { z } from 'zod'
 import { upsertPrediction, getMyPredictions, calculateAllPoints, getRanking, getAllPredictions, getUserPredictions, getUserStats } from './predictions.service.js'
 import { upsertPredictionSchema, userIdParamSchema } from './predictions.validation.js'
 import { getIO } from '../../config/socket.js'
@@ -45,7 +46,12 @@ export async function ranking(req: Request, res: Response, next: NextFunction): 
 
 export async function allPredictions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = await getAllPredictions()
+    const querySchema = z.object({
+      skip: z.coerce.number().min(0).optional().default(0),
+      take: z.coerce.number().min(1).max(500).optional().default(100),
+    })
+    const { skip, take } = querySchema.parse(req.query)
+    const result = await getAllPredictions(skip, take)
     res.json(result)
   } catch (err) {
     next(err)

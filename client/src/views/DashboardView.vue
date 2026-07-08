@@ -3,19 +3,21 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { Swords, Trophy, ChartLine, Target, Star, Zap, TrendingUp, Medal, ChevronRight } from '@lucide/vue'
 import { Card, CardContent, Skeleton, EmptyState } from '@/components/ui'
+import { api } from '@/services/api'
+import type { UserStats } from '@/types'
 
 const auth = useAuthStore()
-const stats = ref<any>(null)
+const stats = ref<UserStats | null>(null)
 const loading = ref(true)
 
 async function fetchStats() {
   try {
-    const res = await fetch('/api/predictions/stats', {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
-    if (res.ok) stats.value = await res.json()
-  } catch { /* silent */ }
-  finally { loading.value = false }
+    stats.value = await api.get('/predictions/stats')
+  } catch (e) {
+    console.error('Error fetching stats:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(fetchStats)
@@ -26,7 +28,7 @@ const quickLinks = [
   { to: '/standings', icon: Trophy, title: 'Posiciones', desc: 'Ranking de puntos acumulados' },
 ]
 
-const statCards = [
+const statCards: { key: keyof UserStats; label: string; icon: any; sub?: string }[] = [
   { key: 'totalPredictions', label: 'Pronósticos', icon: Target },
   { key: 'exactPredictions', label: 'Exactos', icon: Star, sub: '6 pts' },
   { key: 'correctWinnerPredictions', label: 'Ganador', icon: Medal, sub: '3 pts' },
@@ -35,7 +37,7 @@ const statCards = [
   { key: 'avgPoints', label: 'Promedio pts', icon: ChartLine },
 ]
 
-function statValue(key: string) {
+function statValue(key: keyof UserStats) {
   const v = stats.value?.[key]
   if (key === 'avgPoints') return Number(v).toFixed(1)
   return v ?? '-'

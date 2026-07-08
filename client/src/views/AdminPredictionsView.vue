@@ -40,7 +40,7 @@ async function fetchPredictions() {
   const res = await fetch('/api/predictions/admin/all', {
     headers: { Authorization: `Bearer ${auth.token}` },
   })
-  if (res.ok) predictions.value = await res.json()
+  if (res.ok) { const data = await res.json(); predictions.value = data.predictions ?? data }
   loading.value = false
 }
 
