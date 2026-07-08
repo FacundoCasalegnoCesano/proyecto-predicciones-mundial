@@ -9,7 +9,7 @@ import { env } from './config/env.js'
 const app = express()
 
 app.use(helmet())
-app.use(cors({ origin: env.FRONTEND_URL, credentials: true }))
+app.use(cors({ origin: env.FRONTEND_URLS, credentials: true }))
 app.use(express.json())
 
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCss: '.swagger-ui .topbar { display: none }' }))
