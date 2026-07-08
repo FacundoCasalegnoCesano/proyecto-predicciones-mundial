@@ -12,7 +12,7 @@ export function getIO(): SocketServer {
 export function createSocketServer() {
   const httpServer = createServer(app)
   io = new SocketServer(httpServer, {
-    cors: { origin: env.FRONTEND_URL },
+    cors: { origin: env.FRONTEND_URLS },
   })
   return httpServer
 }

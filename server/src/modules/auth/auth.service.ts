@@ -12,15 +12,17 @@ const secret = env.JWT_SECRET
 const resetSecret = secret + '-reset'
 const frontendUrl = env.FRONTEND_URL
 
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-  },
-})
+const transporter = env.SMTP_USER && env.SMTP_PASS
+  ? nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    })
+  : null
 
 type RegisterInput = {
   username: string
@@ -145,12 +147,14 @@ export async function forgotPassword(email: string) {
 
   const resetLink = `${frontendUrl}/reset-password?token=${token}`
 
-  await transporter.sendMail({
-    from: env.SMTP_USER,
-    to: email,
-    subject: 'Recuperación de contraseña - Mundial 2026',
-    html: `<p>Hacé click acá para restablecer tu contraseña:</p><p><a href="${resetLink}">${resetLink}</a></p><p>Este link expira en 1 hora.</p>`,
-  })
+  if (transporter) {
+    await transporter.sendMail({
+      from: env.SMTP_USER,
+      to: email,
+      subject: 'Recuperación de contraseña - Mundial 2026',
+      html: `<p>Hacé click acá para restablecer tu contraseña:</p><p><a href="${resetLink}">${resetLink}</a></p><p>Este link expira en 1 hora.</p>`,
+    })
+  }
 
   return { message: 'If the email exists, a reset link has been sent' }
 }
